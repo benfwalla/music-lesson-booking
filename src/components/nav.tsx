@@ -2,15 +2,17 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Music, Calendar, Users, Clock, BookOpen } from 'lucide-react';
+import { Music, Calendar, Users, Clock, BookOpen, UserCheck, Megaphone } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 const links = [
   { href: '/', label: 'Dashboard', icon: Music },
   { href: '/availability', label: 'Availability', icon: Clock },
   { href: '/students', label: 'Students', icon: Users },
+  { href: '/instructors', label: 'Instructors', icon: UserCheck },
   { href: '/schedule', label: 'Schedule', icon: Calendar },
   { href: '/bookings', label: 'Bookings', icon: BookOpen },
+  { href: '/announcements', label: 'Announcements', icon: Megaphone },
 ];
 
 export function Nav() {
@@ -37,7 +39,7 @@ export function Nav() {
                 )}
               >
                 <Icon className="h-4 w-4" />
-                <span className="hidden md:inline">{label}</span>
+                <span className="hidden lg:inline">{label}</span>
               </Link>
             ))}
           </div>

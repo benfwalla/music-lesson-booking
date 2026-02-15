@@ -11,16 +11,20 @@ import { TimeSlotEditor } from '@/components/time-slot-editor';
 import { MultiSelect } from '@/components/multi-select';
 import { getStudents, addStudent, updateStudent, deleteStudent, getInstructorProfile, computeMatch } from '@/lib/store';
 import { Student, ALL_INSTRUMENTS, SKILL_LEVELS, LESSON_DURATIONS, Instrument, SkillLevel, LessonDuration, DAYS_OF_WEEK, TimeSlot } from '@/lib/types';
-import { Users, Plus, Pencil, Trash2, Music, GraduationCap, Timer, TrendingUp } from 'lucide-react';
+import { Users, Plus, Pencil, Trash2, Music, GraduationCap, Timer, TrendingUp, ShieldAlert } from 'lucide-react';
 
 function StudentForm({ student, onSave, onCancel }: { student?: Student; onSave: (s: Student) => void; onCancel: () => void }) {
   const [name, setName] = useState(student?.name || '');
   const [email, setEmail] = useState(student?.email || '');
   const [phone, setPhone] = useState(student?.phone || '');
   const [instruments, setInstruments] = useState<Instrument[]>(student?.instruments || []);
+  const [customInstruments, setCustomInstruments] = useState<string[]>(student?.customInstruments || []);
   const [skillLevel, setSkillLevel] = useState<SkillLevel>(student?.skillLevel || 'Beginner');
   const [preferredDuration, setPreferredDuration] = useState<LessonDuration>(student?.preferredDuration || 60);
   const [availability, setAvailability] = useState<TimeSlot[]>(student?.availability || []);
+  const [emergencyContactName, setEmergencyContactName] = useState(student?.emergencyContactName || '');
+  const [emergencyContactPhone, setEmergencyContactPhone] = useState(student?.emergencyContactPhone || '');
+  const [emergencyContactRelationship, setEmergencyContactRelationship] = useState(student?.emergencyContactRelationship || '');
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -31,9 +35,13 @@ function StudentForm({ student, onSave, onCancel }: { student?: Student; onSave:
       email: email.trim(),
       phone: phone.trim(),
       instruments,
+      customInstruments,
       skillLevel,
       preferredDuration,
       availability,
+      emergencyContactName: emergencyContactName.trim(),
+      emergencyContactPhone: emergencyContactPhone.trim(),
+      emergencyContactRelationship: emergencyContactRelationship.trim(),
     });
   };
 
@@ -63,6 +71,8 @@ function StudentForm({ student, onSave, onCancel }: { student?: Student; onSave:
           options={ALL_INSTRUMENTS}
           selected={instruments}
           onChange={(i) => setInstruments(i as Instrument[])}
+          customValues={customInstruments}
+          onCustomValuesChange={setCustomInstruments}
         />
       </div>
 
@@ -109,6 +119,39 @@ function StudentForm({ student, onSave, onCancel }: { student?: Student; onSave:
               {dur} min
             </button>
           ))}
+        </div>
+      </div>
+
+      {/* Emergency Contact */}
+      <div>
+        <Label className="text-base font-semibold flex items-center gap-1.5 mb-2">
+          <ShieldAlert className="h-4 w-4" /> Emergency Contact
+        </Label>
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+          <div>
+            <Label className="text-sm">Name</Label>
+            <Input value={emergencyContactName} onChange={e => setEmergencyContactName(e.target.value)} placeholder="Jane Doe" />
+          </div>
+          <div>
+            <Label className="text-sm">Phone</Label>
+            <Input value={emergencyContactPhone} onChange={e => setEmergencyContactPhone(e.target.value)} placeholder="(555) 987-6543" />
+          </div>
+          <div>
+            <Label className="text-sm">Relationship</Label>
+            <select
+              value={emergencyContactRelationship}
+              onChange={e => setEmergencyContactRelationship(e.target.value)}
+              className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            >
+              <option value="">Select...</option>
+              <option value="Parent">Parent</option>
+              <option value="Guardian">Guardian</option>
+              <option value="Spouse">Spouse</option>
+              <option value="Sibling">Sibling</option>
+              <option value="Friend">Friend</option>
+              <option value="Other">Other</option>
+            </select>
+          </div>
         </div>
       </div>
 
@@ -224,71 +267,88 @@ export default function StudentsPage() {
         </Card>
       ) : (
         <div className="grid gap-4">
-          {students.map(student => (
-            <Card key={student.id} className="overflow-hidden">
-              <CardHeader className="flex flex-row items-start justify-between pb-3">
-                <div className="flex items-start gap-3">
-                  <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center shrink-0 mt-0.5">
-                    <Music className="h-5 w-5 text-primary" />
+          {students.map(student => {
+            const allInstruments = [
+              ...student.instruments.filter(i => i !== 'Other'),
+              ...(student.customInstruments || []),
+            ];
+            return (
+              <Card key={student.id} className="overflow-hidden">
+                <CardHeader className="flex flex-row items-start justify-between pb-3">
+                  <div className="flex items-start gap-3">
+                    <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center shrink-0 mt-0.5">
+                      <Music className="h-5 w-5 text-primary" />
+                    </div>
+                    <div>
+                      <CardTitle className="flex items-center gap-2 flex-wrap">
+                        {student.name}
+                        <ScoreBadge score={matchScores[student.id] || 0} />
+                      </CardTitle>
+                      <CardDescription>
+                        {[student.email, student.phone].filter(Boolean).join(' • ') || 'No contact info'}
+                      </CardDescription>
+                    </div>
                   </div>
-                  <div>
-                    <CardTitle className="flex items-center gap-2 flex-wrap">
-                      {student.name}
-                      <ScoreBadge score={matchScores[student.id] || 0} />
-                    </CardTitle>
-                    <CardDescription>
-                      {[student.email, student.phone].filter(Boolean).join(' • ') || 'No contact info'}
-                    </CardDescription>
+                  <div className="flex gap-1 shrink-0">
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => { setEditingStudent(student); setShowForm(true); }}
+                    >
+                      <Pencil className="h-4 w-4" />
+                    </Button>
+                    <Button variant="ghost" size="icon" onClick={() => handleDelete(student.id)}>
+                      <Trash2 className="h-4 w-4 text-destructive" />
+                    </Button>
                   </div>
-                </div>
-                <div className="flex gap-1 shrink-0">
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => { setEditingStudent(student); setShowForm(true); }}
-                  >
-                    <Pencil className="h-4 w-4" />
-                  </Button>
-                  <Button variant="ghost" size="icon" onClick={() => handleDelete(student.id)}>
-                    <Trash2 className="h-4 w-4 text-destructive" />
-                  </Button>
-                </div>
-              </CardHeader>
-              <CardContent className="space-y-3">
-                {/* Profile details */}
-                <div className="flex flex-wrap gap-4 text-sm">
-                  {student.instruments.length > 0 && (
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  <div className="flex flex-wrap gap-4 text-sm">
+                    {allInstruments.length > 0 && (
+                      <div className="flex items-center gap-1.5">
+                        <Music className="h-3.5 w-3.5 text-muted-foreground" />
+                        <span>{allInstruments.join(', ')}</span>
+                      </div>
+                    )}
                     <div className="flex items-center gap-1.5">
-                      <Music className="h-3.5 w-3.5 text-muted-foreground" />
-                      <span>{student.instruments.join(', ')}</span>
+                      <GraduationCap className="h-3.5 w-3.5 text-muted-foreground" />
+                      <span>{student.skillLevel}</span>
+                    </div>
+                    <div className="flex items-center gap-1.5">
+                      <Timer className="h-3.5 w-3.5 text-muted-foreground" />
+                      <span>{student.preferredDuration} min lessons</span>
+                    </div>
+                  </div>
+
+                  {/* Emergency Contact */}
+                  {student.emergencyContactName && (
+                    <div className="flex items-center gap-2 text-sm bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800 rounded-md px-3 py-2">
+                      <ShieldAlert className="h-4 w-4 text-amber-600 shrink-0" />
+                      <span>
+                        <strong>Emergency:</strong> {student.emergencyContactName}
+                        {student.emergencyContactRelationship && ` (${student.emergencyContactRelationship})`}
+                        {student.emergencyContactPhone && ` — ${student.emergencyContactPhone}`}
+                      </span>
                     </div>
                   )}
-                  <div className="flex items-center gap-1.5">
-                    <GraduationCap className="h-3.5 w-3.5 text-muted-foreground" />
-                    <span>{student.skillLevel}</span>
-                  </div>
-                  <div className="flex items-center gap-1.5">
-                    <Timer className="h-3.5 w-3.5 text-muted-foreground" />
-                    <span>{student.preferredDuration} min lessons</span>
-                  </div>
-                </div>
 
-                {student.availability.length > 0 && (
-                  <div className="flex flex-wrap gap-1.5">
-                    {DAYS_OF_WEEK.map(day => {
-                      const daySlots = student.availability.filter(s => s.day === day);
-                      if (daySlots.length === 0) return null;
-                      return daySlots.map(slot => (
-                        <Badge key={slot.id} variant="outline" className="text-xs">
-                          {day.slice(0, 3)} {slot.startTime}–{slot.endTime}
-                        </Badge>
-                      ));
-                    })}
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-          ))}
+                  {student.availability.length > 0 && (
+                    <div className="flex flex-wrap gap-1.5">
+                      {DAYS_OF_WEEK.map(day => {
+                        const daySlots = student.availability.filter(s => s.day === day);
+                        if (daySlots.length === 0) return null;
+                        return daySlots.map(slot => (
+                          <Badge key={slot.id} variant="outline" className="text-xs">
+                            {day.slice(0, 3)} {slot.startTime}–{slot.endTime}
+                          </Badge>
+                        ));
+                      })}
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            );
+          })}
         </div>
       )}
     </div>

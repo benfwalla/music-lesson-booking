@@ -5,6 +5,7 @@ export const DAYS_OF_WEEK: DayOfWeek[] = ['Monday', 'Tuesday', 'Wednesday', 'Thu
 export const ALL_INSTRUMENTS = [
   'Piano', 'Guitar', 'Drums', 'Violin', 'Bass', 'Vocals',
   'Saxophone', 'Trumpet', 'Flute', 'Cello', 'Ukulele', 'Clarinet',
+  'Other',
 ] as const;
 
 export type Instrument = typeof ALL_INSTRUMENTS[number];
@@ -23,8 +24,13 @@ export interface TimeSlot {
 }
 
 export interface InstructorProfile {
+  id: string;
   name: string;
+  email: string;
+  phone: string;
+  bio: string;
   instruments: Instrument[];
+  customInstruments: string[];
   skillLevels: SkillLevel[];
   lessonDurations: LessonDuration[];
   availability: TimeSlot[];
@@ -36,9 +42,13 @@ export interface Student {
   email: string;
   phone: string;
   instruments: Instrument[];
+  customInstruments?: string[];
   skillLevel: SkillLevel;
   preferredDuration: LessonDuration;
   availability: TimeSlot[];
+  emergencyContactName: string;
+  emergencyContactPhone: string;
+  emergencyContactRelationship: string;
   // legacy compat
   instrument?: string;
 }
@@ -54,6 +64,16 @@ export interface Booking {
   recurring: boolean;
   notes: string;
   createdAt: string;
+}
+
+export interface Announcement {
+  id: string;
+  title: string;
+  body: string;
+  type: 'general' | 'recital';
+  recitalDate?: string; // ISO date for recital type
+  createdAt: string;
+  updatedAt: string;
 }
 
 export interface MatchResult {
