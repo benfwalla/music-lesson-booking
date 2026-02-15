@@ -164,6 +164,21 @@ export const RENTAL_PRICING: Record<string, RentalPricing> = {
   'Cases': { daily: 10, weekly: 35, monthly: 75, semester: 250 },
 };
 
+export interface Resource {
+  id: string;
+  title: string;
+  description: string;
+  type: 'pdf' | 'image' | 'text';
+  data: string;
+  fileName?: string;
+  mimeType?: string;
+  uploadedBy: string;
+  uploadedByName: string;
+  assignedTo: string[];
+  instrument?: string;
+  createdAt: string;
+}
+
 export interface RentalBooking {
   id: string;
   confirmationCode: string;

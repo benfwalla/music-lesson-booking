@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Music, Calendar, Users, Clock, BookOpen, UserCheck, Megaphone, Shield, GraduationCap, User, ArrowLeftRight, Package } from 'lucide-react';
+import { Music, Calendar, Users, Clock, BookOpen, UserCheck, Megaphone, Shield, GraduationCap, User, ArrowLeftRight, Package, FileText } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useRole, Role } from '@/lib/role-context';
 
@@ -21,6 +21,7 @@ const allLinks: NavLink[] = [
   { href: '/bookings', label: 'Bookings', icon: BookOpen, roles: ['admin'] },
   { href: '/announcements', label: 'Announcements', icon: Megaphone, roles: ['admin'] },
   { href: '/rentals', label: 'Rentals', icon: Package, roles: ['admin'] },
+  { href: '/resources', label: 'Resources', icon: FileText, roles: ['admin'] },
   // Instructor
   { href: '/my-profile', label: 'My Profile', icon: User, roles: ['instructor'] },
   { href: '/instructors', label: 'Directory', icon: UserCheck, roles: ['instructor'] },
@@ -28,12 +29,14 @@ const allLinks: NavLink[] = [
   { href: '/bookings', label: 'My Schedule', icon: BookOpen, roles: ['instructor'] },
   { href: '/announcements', label: 'Announcements', icon: Megaphone, roles: ['instructor'] },
   { href: '/rentals', label: 'Rentals', icon: Package, roles: ['instructor'] },
+  { href: '/resources', label: 'Resources', icon: FileText, roles: ['instructor'] },
   // Student
   { href: '/announcements', label: 'Announcements', icon: Megaphone, roles: ['student'] },
   { href: '/instructors', label: 'Instructors', icon: UserCheck, roles: ['student'] },
   { href: '/my-profile', label: 'My Profile', icon: User, roles: ['student'] },
   { href: '/bookings', label: 'My Lessons', icon: BookOpen, roles: ['student'] },
   { href: '/rentals', label: 'Rentals', icon: Package, roles: ['student'] },
+  { href: '/resources', label: 'Resources', icon: FileText, roles: ['student'] },
 ];
 
 const roleBadge: Record<Role, { label: string; color: string }> = {

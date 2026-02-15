@@ -1,6 +1,6 @@
 'use client';
 
-import { Student, Booking, TimeSlot, InstructorProfile, MatchResult, Instrument, Announcement, RentalBooking, RentalPricing } from './types';
+import { Student, Booking, TimeSlot, InstructorProfile, MatchResult, Instrument, Announcement, RentalBooking, RentalPricing, Resource } from './types';
 
 const STORAGE_KEYS = {
   INSTRUCTOR_PROFILE: 'mlb_instructor_profile',
@@ -10,6 +10,7 @@ const STORAGE_KEYS = {
   ANNOUNCEMENTS: 'mlb_announcements',
   ADMIN_MODE: 'mlb_admin_mode',
   RENTALS: 'mlb_rentals',
+  RESOURCES: 'mlb_resources',
   SEEDED: 'mlb_seeded',
 };
 
@@ -323,6 +324,30 @@ export function updateRental(rental: RentalBooking): void {
     list[idx] = rental;
     setRentals(list);
   }
+}
+
+// Resources
+export function getResources(): Resource[] {
+  return getItem<Resource[]>(STORAGE_KEYS.RESOURCES, []);
+}
+
+export function addResource(r: Resource): void {
+  const list = getResources();
+  list.push(r);
+  setItem(STORAGE_KEYS.RESOURCES, list);
+}
+
+export function updateResource(r: Resource): void {
+  const list = getResources();
+  const idx = list.findIndex(x => x.id === r.id);
+  if (idx !== -1) {
+    list[idx] = r;
+    setItem(STORAGE_KEYS.RESOURCES, list);
+  }
+}
+
+export function deleteResource(id: string): void {
+  setItem(STORAGE_KEYS.RESOURCES, getResources().filter(r => r.id !== id));
 }
 
 // Seed instructors
