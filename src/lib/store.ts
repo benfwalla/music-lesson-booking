@@ -1,11 +1,19 @@
 'use client';
 
-import { Student, Booking, TimeSlot } from './types';
+import { Student, Booking, TimeSlot, InstructorProfile, MatchResult, Instrument } from './types';
 
 const STORAGE_KEYS = {
-  INSTRUCTOR_AVAILABILITY: 'mlb_instructor_availability',
+  INSTRUCTOR_PROFILE: 'mlb_instructor_profile',
   STUDENTS: 'mlb_students',
   BOOKINGS: 'mlb_bookings',
+};
+
+const DEFAULT_INSTRUCTOR: InstructorProfile = {
+  name: '',
+  instruments: [],
+  skillLevels: [],
+  lessonDurations: [],
+  availability: [],
 };
 
 function getItem<T>(key: string, defaultValue: T): T {
@@ -23,18 +31,42 @@ function setItem<T>(key: string, value: T): void {
   localStorage.setItem(key, JSON.stringify(value));
 }
 
-// Instructor Availability
+// Instructor Profile
+export function getInstructorProfile(): InstructorProfile {
+  // Migrate from old availability-only format
+  const profile = getItem<InstructorProfile>(STORAGE_KEYS.INSTRUCTOR_PROFILE, DEFAULT_INSTRUCTOR);
+  if (!profile.instruments) profile.instruments = [];
+  if (!profile.skillLevels) profile.skillLevels = [];
+  if (!profile.lessonDurations) profile.lessonDurations = [];
+  if (!profile.availability) profile.availability = [];
+  return profile;
+}
+
+export function setInstructorProfile(profile: InstructorProfile): void {
+  setItem(STORAGE_KEYS.INSTRUCTOR_PROFILE, profile);
+}
+
+// Legacy compat
 export function getInstructorAvailability(): TimeSlot[] {
-  return getItem<TimeSlot[]>(STORAGE_KEYS.INSTRUCTOR_AVAILABILITY, []);
+  return getInstructorProfile().availability;
 }
 
 export function setInstructorAvailability(slots: TimeSlot[]): void {
-  setItem(STORAGE_KEYS.INSTRUCTOR_AVAILABILITY, slots);
+  const profile = getInstructorProfile();
+  profile.availability = slots;
+  setInstructorProfile(profile);
 }
 
 // Students
 export function getStudents(): Student[] {
-  return getItem<Student[]>(STORAGE_KEYS.STUDENTS, []);
+  const students = getItem<Student[]>(STORAGE_KEYS.STUDENTS, []);
+  // Migrate old format
+  return students.map(s => ({
+    ...s,
+    instruments: s.instruments || (s.instrument ? [s.instrument as Instrument] : []),
+    skillLevel: s.skillLevel || 'Beginner',
+    preferredDuration: s.preferredDuration || 60,
+  }));
 }
 
 export function setStudents(students: Student[]): void {
@@ -59,7 +91,6 @@ export function updateStudent(student: Student): void {
 export function deleteStudent(id: string): void {
   const students = getStudents().filter(s => s.id !== id);
   setStudents(students);
-  // Also delete bookings for this student
   const bookings = getBookings().filter(b => b.studentId !== id);
   setBookings(bookings);
 }
@@ -84,17 +115,14 @@ export function deleteBooking(id: string): void {
   setBookings(bookings);
 }
 
-// Matching
+// Time overlap
 export function findMatchingSlots(instructorSlots: TimeSlot[], studentSlots: TimeSlot[]): TimeSlot[] {
   const matches: TimeSlot[] = [];
-  
   for (const iSlot of instructorSlots) {
     for (const sSlot of studentSlots) {
       if (iSlot.day !== sSlot.day) continue;
-      
       const overlapStart = iSlot.startTime > sSlot.startTime ? iSlot.startTime : sSlot.startTime;
       const overlapEnd = iSlot.endTime < sSlot.endTime ? iSlot.endTime : sSlot.endTime;
-      
       if (overlapStart < overlapEnd) {
         matches.push({
           id: `match-${iSlot.id}-${sSlot.id}`,
@@ -105,6 +133,54 @@ export function findMatchingSlots(instructorSlots: TimeSlot[], studentSlots: Tim
       }
     }
   }
-  
   return matches;
+}
+
+// Profile Matching
+export function computeMatch(instructor: InstructorProfile, student: Student): MatchResult {
+  // 1. Instrument overlap (0-30)
+  const instrumentOverlap = student.instruments.filter(i =>
+    instructor.instruments.includes(i)
+  );
+  const instrumentScore = student.instruments.length > 0
+    ? Math.round((instrumentOverlap.length / student.instruments.length) * 30)
+    : 0;
+
+  // 2. Skill level (0-25)
+  const skillLevelMatch = instructor.skillLevels.includes(student.skillLevel);
+  const skillScore = skillLevelMatch ? 25 : 0;
+
+  // 3. Duration (0-20)
+  const durationMatch = instructor.lessonDurations.includes(student.preferredDuration);
+  const durationScore = durationMatch ? 20 : 0;
+
+  // 4. Time overlap (0-25)
+  const timeOverlap = findMatchingSlots(instructor.availability, student.availability);
+  // Score based on number of overlapping slots (cap at 5+ = full marks)
+  const timeScore = Math.min(timeOverlap.length * 5, 25);
+
+  const score = instrumentScore + skillScore + durationScore + timeScore;
+
+  return {
+    student,
+    score,
+    instrumentOverlap,
+    skillLevelMatch,
+    durationMatch,
+    timeOverlap,
+    breakdown: {
+      instrumentScore,
+      skillScore,
+      durationScore,
+      timeScore,
+    },
+  };
+}
+
+export function computeAllMatches(): MatchResult[] {
+  const instructor = getInstructorProfile();
+  const students = getStudents();
+  return students
+    .map(s => computeMatch(instructor, s))
+    .sort((a, b) => b.score - a.score);
 }
