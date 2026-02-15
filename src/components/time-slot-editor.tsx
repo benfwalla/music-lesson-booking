@@ -61,7 +61,7 @@ export function TimeSlotEditor({ slots, onChange }: TimeSlotEditorProps) {
           <Label>End</Label>
           <Input type="time" value={endTime} onChange={e => setEndTime(e.target.value)} className="w-32" />
         </div>
-        <Button onClick={addSlot} size="sm">
+        <Button type="button" onClick={addSlot} size="sm">
           <Plus className="h-4 w-4 mr-1" /> Add
         </Button>
       </div>
