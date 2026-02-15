@@ -28,7 +28,7 @@ function ShellInner({ children }: { children: ReactNode }) {
   return (
     <div className="flex min-h-screen">
       <Nav />
-      <main className="ml-56 flex-1 max-w-6xl px-8 py-8">
+      <main className="ml-0 md:ml-56 flex-1 max-w-6xl px-4 md:px-8 pt-18 md:pt-8 pb-4 md:pb-8">
         {children}
       </main>
     </div>

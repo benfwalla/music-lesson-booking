@@ -551,7 +551,7 @@ export default function InstructorsPage() {
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4 py-2">
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <Label>Instrument</Label>
                 <select className="w-full mt-1 rounded-md border border-border bg-background px-3 py-2 text-sm" value={instrument} onChange={e => setInstrument(e.target.value)}>
@@ -596,7 +596,7 @@ export default function InstructorsPage() {
               </button>
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div><Label>Your Name</Label><Input value={studentName} onChange={e => setStudentName(e.target.value)} className="mt-1" placeholder="Full name" /></div>
               <div><Label>Phone Number</Label><Input type="tel" value={studentPhone} onChange={e => setStudentPhone(e.target.value)} className="mt-1" placeholder="(555) 123-4567" /></div>
             </div>

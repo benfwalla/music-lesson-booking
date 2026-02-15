@@ -217,3 +217,53 @@ button, a, [role="button"] {
   0%, 100% { text-shadow: 0 0 20px rgba(212, 175, 55, 0.3); }
   50% { text-shadow: 0 0 30px rgba(212, 175, 55, 0.6), 0 0 60px rgba(212, 175, 55, 0.2); }
 }
+
+/* === MOBILE OPTIMIZATIONS === */
+
+/* Smooth scrolling */
+html {
+  scroll-behavior: smooth;
+  -webkit-text-size-adjust: 100%;
+}
+
+/* Prevent horizontal overflow */
+body {
+  overflow-x: hidden;
+}
+
+/* Mobile-friendly modals/dialogs */
+@media (max-width: 767px) {
+  [role="dialog"],
+  [data-state="open"][class*="DialogContent"] {
+    max-height: 90vh !important;
+    overflow-y: auto !important;
+    max-width: calc(100vw - 2rem) !important;
+    border-radius: 1rem !important;
+  }
+
+  /* Touch targets: minimum 44px for buttons and interactive elements */
+  button,
+  [role="button"],
+  a,
+  select,
+  input[type="checkbox"],
+  input[type="radio"] {
+    min-height: 44px;
+    min-width: 44px;
+  }
+
+  /* Exceptions for inline small elements that don't need 44px */
+  button.h-8,
+  button.h-7,
+  [role="button"].h-8,
+  [data-slot="badge"] button,
+  .confetti-piece {
+    min-height: unset;
+    min-width: unset;
+  }
+
+  /* Ensure readable font sizes */
+  body {
+    font-size: 14px;
+  }
+}

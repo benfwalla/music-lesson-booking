@@ -71,19 +71,21 @@ export default function BookingsPage() {
         <div className="rounded-xl border border-border overflow-hidden">
           {sortedBookings.map((booking, idx) => (
             <div key={booking.id}
-              className={`flex items-center gap-4 px-4 py-3 hover:bg-[#1a1708] transition-colors ${idx < sortedBookings.length - 1 ? 'border-b border-border' : ''}`}>
-              <div className="h-9 w-9 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
-                <Music className="h-4 w-4 text-primary" />
-              </div>
-              <div className="min-w-0 flex-1">
-                <div className="font-semibold text-sm">{booking.studentName}</div>
-                <div className="text-xs text-muted-foreground">
-                  {booking.instrument && <>{booking.instrument} · </>}
-                  {booking.notes && <>{booking.notes} · </>}
-                  {new Date(booking.createdAt).toLocaleDateString()}
+              className={`flex flex-col md:flex-row md:items-center gap-3 md:gap-4 px-4 py-3 hover:bg-[#1a1708] transition-colors ${idx < sortedBookings.length - 1 ? 'border-b border-border' : ''}`}>
+              <div className="flex items-center gap-3 min-w-0 flex-1">
+                <div className="h-9 w-9 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
+                  <Music className="h-4 w-4 text-primary" />
+                </div>
+                <div className="min-w-0">
+                  <div className="font-semibold text-sm">{booking.studentName}</div>
+                  <div className="text-xs text-muted-foreground">
+                    {booking.instrument && <>{booking.instrument} · </>}
+                    {booking.notes && <>{booking.notes} · </>}
+                    {new Date(booking.createdAt).toLocaleDateString()}
+                  </div>
                 </div>
               </div>
-              <div className="flex items-center gap-2 shrink-0">
+              <div className="flex items-center gap-2 shrink-0 flex-wrap">
                 <Badge variant="outline" className="text-xs">{booking.day}</Badge>
                 <Badge variant="secondary" className="text-xs">{booking.startTime} – {booking.endTime}</Badge>
                 {booking.recurring && <Badge className="text-xs">Weekly</Badge>}

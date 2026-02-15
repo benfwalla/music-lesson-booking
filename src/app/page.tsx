@@ -57,7 +57,7 @@ export default function Dashboard() {
         <p className="text-muted-foreground mt-1">Welcome to Elevated Music Center — your lesson scheduling hub</p>
       </div>
 
-      <div className="grid grid-cols-2 lg:grid-cols-5 gap-4">
+      <div className="grid grid-cols-1 xs:grid-cols-2 lg:grid-cols-5 gap-4">
         {[
           { label: 'Instructors', value: instructorCount, icon: UserCheck },
           { label: 'Students', value: students.length, icon: Users },
@@ -133,12 +133,12 @@ export default function Dashboard() {
           ) : (
             <div className="space-y-3">
               {todayBookings.map(booking => (
-                <div key={booking.id} className="flex items-center justify-between p-3 rounded-lg bg-accent/50">
+                <div key={booking.id} className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 p-3 rounded-lg bg-accent/50">
                   <div>
                     <span className="font-medium">{booking.studentName}</span>
                     {booking.instrument && <span className="text-muted-foreground text-sm ml-2">({booking.instrument})</span>}
                   </div>
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-2 flex-wrap">
                     <Badge variant="secondary">{booking.startTime} – {booking.endTime}</Badge>
                     {booking.recurring && <Badge>Weekly</Badge>}
                   </div>
@@ -160,12 +160,12 @@ export default function Dashboard() {
           ) : (
             <div className="space-y-2">
               {upcomingBookings.map(booking => (
-                <div key={booking.id} className="flex items-center justify-between p-3 rounded-lg border">
+                <div key={booking.id} className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 p-3 rounded-lg border">
                   <div>
                     <span className="font-medium">{booking.studentName}</span>
                     {booking.instrument && <span className="text-muted-foreground text-sm ml-2">• {booking.instrument}</span>}
                   </div>
-                  <div className="flex items-center gap-2 text-sm">
+                  <div className="flex items-center gap-2 text-sm flex-wrap">
                     <Badge variant="outline">{booking.day}</Badge>
                     <span>{booking.startTime} – {booking.endTime}</span>
                   </div>

@@ -125,7 +125,7 @@ export default function RentalsPage() {
 
       {/* Catalog */}
       {tab === 'catalog' && (
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+        <div className="grid gap-4 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
           {RENTAL_CATEGORIES.map(cat => (
             <Card key={cat.name}>
               <CardHeader className="pb-3">
@@ -164,13 +164,13 @@ export default function RentalsPage() {
               <CardHeader className="pb-2"><CardTitle className="text-primary text-base">{cat.name}</CardTitle></CardHeader>
               <CardContent>
                 <div className="space-y-3">
-                  <div className="grid grid-cols-5 gap-2 text-xs text-muted-foreground font-medium">
+                  <div className="hidden md:grid grid-cols-5 gap-2 text-xs text-muted-foreground font-medium">
                     <span>Instrument</span><span>Daily ($)</span><span>Weekly ($)</span><span>Monthly ($)</span><span>Semester ($)</span>
                   </div>
                   {cat.instruments.map(inst => {
                     const p = customPricing[inst] || RENTAL_PRICING[inst] || { daily: 0, weekly: 0, monthly: 0, semester: 0 };
                     return (
-                      <div key={inst} className="grid grid-cols-5 gap-2 items-center">
+                      <div key={inst} className="grid grid-cols-2 md:grid-cols-5 gap-2 items-center">
                         <span className="text-sm">{inst}</span>
                         {(['daily', 'weekly', 'monthly', 'semester'] as RentalDuration[]).map(dur => (
                           <Input
@@ -197,7 +197,7 @@ export default function RentalsPage() {
         <Card className="max-w-2xl">
           <CardHeader><CardTitle>Book a Rental</CardTitle></CardHeader>
           <CardContent className="space-y-4">
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <Label>Category</Label>
                 <select
@@ -223,7 +223,7 @@ export default function RentalsPage() {
               </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <Label>Rental Duration</Label>
                 <select
@@ -250,11 +250,11 @@ export default function RentalsPage() {
               </div>
             )}
 
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div><Label>Full Name</Label><Input value={renterName} onChange={e => setRenterName(e.target.value)} className="mt-1" /></div>
               <div><Label>Email</Label><Input type="email" value={renterEmail} onChange={e => setRenterEmail(e.target.value)} className="mt-1" /></div>
             </div>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div><Label>Phone</Label><Input type="tel" value={renterPhone} onChange={e => setRenterPhone(e.target.value)} className="mt-1" /></div>
               <div className="flex items-end gap-2 pb-1">
                 <input type="checkbox" id="student-check" checked={isStudent} onChange={e => setIsStudent(e.target.checked)} className="rounded" />
@@ -329,7 +329,7 @@ export default function RentalsPage() {
           {rentals.length > 0 && (
             <div className="rounded-xl border border-border overflow-hidden">
               {rentals.map((r, idx) => (
-                <div key={r.id} className={`flex items-center gap-4 px-4 py-3 hover:bg-[#1a1708] transition-colors ${idx < rentals.length - 1 ? 'border-b border-border' : ''}`}>
+                <div key={r.id} className={`flex flex-col md:flex-row md:items-center gap-3 px-4 py-3 hover:bg-[#1a1708] transition-colors ${idx < rentals.length - 1 ? 'border-b border-border' : ''}`}>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 flex-wrap">
                       <span className="font-semibold text-sm">{r.instrument}</span>
