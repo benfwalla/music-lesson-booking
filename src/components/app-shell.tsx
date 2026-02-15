@@ -1,12 +1,17 @@
 'use client';
 
-import { ReactNode } from 'react';
+import { ReactNode, useEffect } from 'react';
 import { RoleProvider, useRole } from '@/lib/role-context';
 import { RolePicker } from '@/components/role-picker';
 import { Nav } from '@/components/nav';
+import { seedInstructors } from '@/lib/store';
 
 function ShellInner({ children }: { children: ReactNode }) {
   const { role, isReady } = useRole();
+
+  useEffect(() => {
+    seedInstructors();
+  }, []);
 
   if (!isReady) {
     return (

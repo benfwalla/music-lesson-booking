@@ -1,6 +1,6 @@
 'use client';
 
-import { Student, Booking, TimeSlot, InstructorProfile, MatchResult, Instrument, Announcement } from './types';
+import { Student, Booking, TimeSlot, InstructorProfile, MatchResult, Instrument, Announcement, RentalBooking } from './types';
 
 const STORAGE_KEYS = {
   INSTRUCTOR_PROFILE: 'mlb_instructor_profile',
@@ -9,6 +9,8 @@ const STORAGE_KEYS = {
   BOOKINGS: 'mlb_bookings',
   ANNOUNCEMENTS: 'mlb_announcements',
   ADMIN_MODE: 'mlb_admin_mode',
+  RENTALS: 'mlb_rentals',
+  SEEDED: 'mlb_seeded',
 };
 
 const DEFAULT_INSTRUCTOR: InstructorProfile = {
@@ -286,4 +288,84 @@ export function computeAllMatches(): MatchResult[] {
   return students
     .map(s => computeMatch(instructor, s))
     .sort((a, b) => b.score - a.score);
+}
+
+// Rentals
+export function getRentals(): RentalBooking[] {
+  return getItem<RentalBooking[]>(STORAGE_KEYS.RENTALS, []);
+}
+
+export function setRentals(rentals: RentalBooking[]): void {
+  setItem(STORAGE_KEYS.RENTALS, rentals);
+}
+
+export function addRental(rental: RentalBooking): void {
+  const list = getRentals();
+  list.push(rental);
+  setRentals(list);
+}
+
+export function updateRental(rental: RentalBooking): void {
+  const list = getRentals();
+  const idx = list.findIndex(r => r.id === rental.id);
+  if (idx !== -1) {
+    list[idx] = rental;
+    setRentals(list);
+  }
+}
+
+// Seed instructors
+const SEED_INSTRUCTORS: { name: string; instruments: Instrument[] }[] = [
+  { name: 'Tim Kloewer', instruments: ['Banjo', 'Cello', 'French Horn', 'Guitar', 'Piano', 'Trombone', 'Trumpet', 'Tuba', 'Ukulele', 'Upright Bass', 'Vocals'] },
+  { name: 'Chris Asercion', instruments: ['Clarinet', 'Flute', 'Piano', 'Saxophone'] },
+  { name: 'Chad Irish', instruments: ['Drums'] },
+  { name: 'Keelan McDorman', instruments: ['Drums', 'Piano'] },
+  { name: 'Liam Shea', instruments: ['Drums', 'Guitar', 'Piano', 'Ukulele'] },
+  { name: 'Max Turski', instruments: ['Flute'] },
+  { name: 'Adam Hernandez', instruments: ['Guitar', 'Ukulele'] },
+  { name: 'Brett Kuyper', instruments: ['Guitar', 'Piano', 'Ukulele'] },
+  { name: 'Doug Emery', instruments: ['Guitar', 'Piano', 'Ukulele'] },
+  { name: 'Elle Reynolds', instruments: ['Guitar', 'Vocals'] },
+  { name: 'Elyjah Youngblood', instruments: ['Guitar'] },
+  { name: 'Evan Jelley', instruments: ['Guitar', 'Piano', 'Vocals'] },
+  { name: 'Gavi Torres-Olivares', instruments: ['Guitar'] },
+  { name: 'Ian Cheyne', instruments: ['Guitar'] },
+  { name: 'Jordan Cromwell', instruments: ['Guitar', 'Ukulele'] },
+  { name: 'Karan Shukla', instruments: ['Guitar'] },
+  { name: 'Melissa Getto', instruments: ['Guitar'] },
+  { name: 'Stephen Koss', instruments: ['Guitar'] },
+  { name: 'Ben Kane', instruments: ['Piano'] },
+  { name: 'Leanne Jojola', instruments: ['Piano', 'Ukulele', 'Vocals'] },
+  { name: 'Shilpa Ravoory', instruments: ['Piano', 'Viola', 'Violin'] },
+  { name: 'Sarah Platt', instruments: ['Viola', 'Violin'] },
+  { name: 'Ashleigh Hunniford', instruments: ['Ukulele', 'Vocals'] },
+];
+
+export function seedInstructors(): void {
+  if (typeof window === 'undefined') return;
+  if (localStorage.getItem(STORAGE_KEYS.SEEDED)) return;
+
+  const instructors: InstructorProfile[] = SEED_INSTRUCTORS.map(s => {
+    const [first, ...rest] = s.name.split(' ');
+    const last = rest.join('.').toLowerCase();
+    return {
+      id: crypto.randomUUID(),
+      name: s.name,
+      email: `${first.toLowerCase()}.${last}@elevatedmusic.com`,
+      phone: '',
+      bio: '',
+      instruments: s.instruments,
+      customInstruments: [],
+      skillLevels: ['Beginner', 'Intermediate', 'Advanced'] as const as any,
+      lessonDurations: [30, 60, 90] as const as any,
+      availability: [],
+    };
+  });
+
+  const existing = getItem<InstructorProfile[]>(STORAGE_KEYS.INSTRUCTORS, []);
+  if (existing.length === 0) {
+    setInstructors(instructors);
+  }
+
+  localStorage.setItem(STORAGE_KEYS.SEEDED, 'true');
 }
