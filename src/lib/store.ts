@@ -1,6 +1,6 @@
 'use client';
 
-import { Student, Booking, TimeSlot, InstructorProfile, MatchResult, Instrument, Announcement, RentalBooking, RentalPricing, Resource } from './types';
+import { Student, Booking, TimeSlot, InstructorProfile, MatchResult, Instrument, Announcement, RentalBooking, RentalPricing, Resource, LessonRequest } from './types';
 
 const STORAGE_KEYS = {
   INSTRUCTOR_PROFILE: 'mlb_instructor_profile',
@@ -12,6 +12,7 @@ const STORAGE_KEYS = {
   RENTALS: 'mlb_rentals',
   RESOURCES: 'mlb_resources',
   SEEDED: 'mlb_seeded',
+  LESSON_REQUESTS: 'mlb_lesson_requests',
 };
 
 const DEFAULT_INSTRUCTOR: InstructorProfile = {
@@ -348,6 +349,26 @@ export function updateResource(r: Resource): void {
 
 export function deleteResource(id: string): void {
   setItem(STORAGE_KEYS.RESOURCES, getResources().filter(r => r.id !== id));
+}
+
+// Lesson Requests
+export function getLessonRequests(): LessonRequest[] {
+  return getItem<LessonRequest[]>(STORAGE_KEYS.LESSON_REQUESTS, []);
+}
+
+export function addLessonRequest(request: LessonRequest): void {
+  const list = getLessonRequests();
+  list.push(request);
+  setItem(STORAGE_KEYS.LESSON_REQUESTS, list);
+}
+
+export function updateLessonRequest(request: LessonRequest): void {
+  const list = getLessonRequests();
+  const idx = list.findIndex(r => r.id === request.id);
+  if (idx !== -1) {
+    list[idx] = request;
+    setItem(STORAGE_KEYS.LESSON_REQUESTS, list);
+  }
 }
 
 // Seed instructors

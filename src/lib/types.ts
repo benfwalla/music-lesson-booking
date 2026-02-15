@@ -30,11 +30,29 @@ export interface InstructorProfile {
   email: string;
   phone: string;
   bio: string;
+  photoUrl?: string;
   instruments: Instrument[];
   customInstruments: string[];
   skillLevels: SkillLevel[];
   lessonDurations: LessonDuration[];
   availability: TimeSlot[];
+}
+
+export interface LessonRequest {
+  id: string;
+  studentName: string;
+  studentEmail: string;
+  studentPhone: string;
+  instructorId: string;
+  instructorName: string;
+  instrument: string;
+  preferredDuration: number;
+  preferredDay: string;
+  preferredTime: string;
+  notes: string;
+  status: 'pending' | 'approved' | 'denied';
+  adminNotes?: string;
+  createdAt: string;
 }
 
 export interface Student {

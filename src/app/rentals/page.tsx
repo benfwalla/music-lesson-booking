@@ -349,26 +349,72 @@ export default function RentalsPage() {
 
       {/* Success Dialog */}
       <Dialog open={!!successBooking} onOpenChange={() => setSuccessBooking(null)}>
-        <DialogContent>
+        <DialogContent className="rental-success-dialog overflow-hidden">
+          {/* Confetti */}
+          <div className="confetti-container" aria-hidden="true">
+            {Array.from({ length: 20 }).map((_, i) => (
+              <div key={i} className="confetti-piece" style={{
+                left: `${Math.random() * 100}%`,
+                animationDelay: `${Math.random() * 2}s`,
+                animationDuration: `${2 + Math.random() * 2}s`,
+                backgroundColor: ['#C5A55A', '#D4AF37', '#FFD700', '#B8993F', '#f59e0b', '#ef4444', '#8b5cf6'][i % 7],
+              }} />
+            ))}
+          </div>
+
           <DialogHeader>
-            <DialogTitle>🎉 Congratulations on your booking!</DialogTitle>
+            <DialogTitle className="text-center text-2xl">
+              🎉 Congratulations! 🎶
+            </DialogTitle>
             <DialogDescription asChild>
-              <div className="space-y-3 pt-2">
-                <p>Here&apos;s your unique ID:</p>
-                <p className="text-2xl font-bold text-primary text-center">{successBooking?.confirmationCode}</p>
-                <p>Bring it to the store and we&apos;ll have your rental ready for you. Please provide payment in person.</p>
-                <div className="rounded-lg bg-primary/10 p-3 text-sm">
-                  <p className="font-semibold">Pickup Location:</p>
-                  <p>{successBooking?.pickupLocation && PICKUP_LOCATIONS[successBooking.pickupLocation]}</p>
+              <div className="space-y-5 pt-4 relative z-10">
+                <p className="text-center text-base">Your rental has been booked! Here&apos;s your confirmation code:</p>
+
+                <div className="confirmation-code-box text-center py-4 px-6 rounded-xl mx-auto max-w-xs">
+                  <p className="text-3xl font-black tracking-wider confirmation-code-text">
+                    {successBooking?.confirmationCode}
+                  </p>
                 </div>
-                <div className="text-sm text-muted-foreground">
-                  <p>{successBooking?.instrument} · {successBooking?.duration && DURATION_LABELS[successBooking.duration]} · ${successBooking?.price}</p>
+
+                <div className="flex justify-center">
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    className="text-xs"
+                    onClick={() => {
+                      if (successBooking?.confirmationCode) {
+                        navigator.clipboard.writeText(successBooking.confirmationCode);
+                      }
+                    }}
+                  >
+                    📋 Copy Confirmation Code
+                  </Button>
+                </div>
+
+                <p className="text-center text-sm text-muted-foreground">
+                  Bring this code to the store and we&apos;ll have your rental ready. Payment in person.
+                </p>
+
+                <div className="pickup-location-card rounded-xl p-4 border border-primary/30 bg-primary/5">
+                  <div className="flex items-start gap-3">
+                    <span className="text-2xl">📍</span>
+                    <div>
+                      <p className="font-semibold text-primary text-sm">Pickup Location</p>
+                      <p className="text-sm mt-0.5">{successBooking?.pickupLocation && PICKUP_LOCATIONS[successBooking.pickupLocation]}</p>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="text-center text-sm text-muted-foreground space-y-0.5">
+                  <p>🎵 {successBooking?.instrument} · {successBooking?.duration && DURATION_LABELS[successBooking.duration]} · ${successBooking?.price}</p>
                   <p>Start: {successBooking?.startDate}</p>
                 </div>
               </div>
             </DialogDescription>
           </DialogHeader>
-          <DialogFooter showCloseButton />
+          <DialogFooter>
+            <Button onClick={() => setSuccessBooking(null)} className="w-full">Done 🎶</Button>
+          </DialogFooter>
         </DialogContent>
       </Dialog>
     </div>

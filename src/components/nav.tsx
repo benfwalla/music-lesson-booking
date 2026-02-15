@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Music, Calendar, Users, Clock, BookOpen, UserCheck, Megaphone, Shield, GraduationCap, User, ArrowLeftRight, Package, FileText } from 'lucide-react';
+import { Music, Calendar, Users, Clock, BookOpen, UserCheck, Megaphone, Shield, GraduationCap, User, ArrowLeftRight, Package, FileText, ClipboardList } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useRole, Role } from '@/lib/role-context';
 
@@ -22,6 +22,7 @@ const allLinks: NavLink[] = [
   { href: '/announcements', label: 'Announcements', icon: Megaphone, roles: ['admin'] },
   { href: '/rentals', label: 'Rentals', icon: Package, roles: ['admin'] },
   { href: '/resources', label: 'Resources', icon: FileText, roles: ['admin'] },
+  { href: '/lesson-requests', label: 'Lesson Requests', icon: ClipboardList, roles: ['admin'] },
   // Instructor
   { href: '/my-profile', label: 'My Profile', icon: User, roles: ['instructor'] },
   { href: '/instructors', label: 'Directory', icon: UserCheck, roles: ['instructor'] },
