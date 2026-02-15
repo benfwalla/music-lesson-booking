@@ -2,10 +2,10 @@
 
 import { useState, useEffect } from 'react';
 import { useRole } from '@/lib/role-context';
-import { getRentals, addRental, updateRental } from '@/lib/store';
+import { getRentals, addRental, updateRental, getCustomRentalPricing, setCustomRentalPricing } from '@/lib/store';
 import {
   RENTAL_CATEGORIES, RENTAL_PRICING, PICKUP_LOCATIONS,
-  RentalBooking, RentalDuration, PickupLocation, RentalStatus,
+  RentalBooking, RentalDuration, PickupLocation, RentalStatus, RentalPricing,
 } from '@/lib/types';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -13,7 +13,7 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
-import { Package, Guitar, Wind, Drum, Piano, Mic2 } from 'lucide-react';
+import { Package, Guitar, Wind, Drum, Piano, Mic2, Settings2, Save } from 'lucide-react';
 
 function genCode(): string {
   const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
@@ -36,7 +36,7 @@ const STATUS_COLORS: Record<RentalStatus, string> = {
 export default function RentalsPage() {
   const { role } = useRole();
   const [rentals, setRentals] = useState<RentalBooking[]>([]);
-  const [tab, setTab] = useState<'catalog' | 'book' | 'admin' | 'history'>('catalog');
+  const [tab, setTab] = useState<'catalog' | 'book' | 'pricing' | 'admin' | 'history'>('catalog');
   const [selectedCategory, setSelectedCategory] = useState<string>('');
   const [selectedInstrument, setSelectedInstrument] = useState<string>('');
   const [duration, setDuration] = useState<RentalDuration>('monthly');
@@ -47,14 +47,34 @@ export default function RentalsPage() {
   const [isStudent, setIsStudent] = useState(false);
   const [pickupLocation, setPickupLocation] = useState<PickupLocation>('centennial');
   const [successBooking, setSuccessBooking] = useState<RentalBooking | null>(null);
+  const [customPricing, setCustomPricingState] = useState<Record<string, RentalPricing>>({});
+  const [pricingSaved, setPricingSaved] = useState(false);
 
-  useEffect(() => { setRentals(getRentals()); }, []);
+  useEffect(() => {
+    setRentals(getRentals());
+    const custom = getCustomRentalPricing();
+    setCustomPricingState(custom || { ...RENTAL_PRICING });
+  }, []);
 
   const refresh = () => setRentals(getRentals());
 
   const categoryInstruments = RENTAL_CATEGORIES.find(c => c.name === selectedCategory)?.instruments || [];
-  const pricing = selectedInstrument ? RENTAL_PRICING[selectedInstrument] : null;
+  const activePricing = { ...RENTAL_PRICING, ...customPricing };
+  const pricing = selectedInstrument ? activePricing[selectedInstrument] : null;
   const currentPrice = pricing ? pricing[duration] : 0;
+
+  function handlePricingChange(instrument: string, field: RentalDuration, value: number) {
+    setCustomPricingState(prev => ({
+      ...prev,
+      [instrument]: { ...(prev[instrument] || RENTAL_PRICING[instrument]), [field]: value },
+    }));
+  }
+
+  function savePricing() {
+    setCustomRentalPricing(customPricing);
+    setPricingSaved(true);
+    setTimeout(() => setPricingSaved(false), 2000);
+  }
 
   function handleBook() {
     if (!selectedInstrument || !startDate || !renterName || !renterEmail || !renterPhone) return;
@@ -95,9 +115,9 @@ export default function RentalsPage() {
 
       {/* Tabs */}
       <div className="flex gap-2 flex-wrap">
-        {(['catalog', 'book', ...(role === 'admin' ? ['admin'] : []), 'history'] as const).map(t => (
+        {(['catalog', 'book', ...(role === 'admin' ? ['pricing', 'admin'] : []), 'history'] as const).map(t => (
           <Button key={t} variant={tab === t ? 'default' : 'outline'} size="sm" onClick={() => setTab(t as any)}>
-            {t === 'catalog' ? 'Catalog' : t === 'book' ? 'Book a Rental' : t === 'admin' ? 'Admin' : 'My History'}
+            {t === 'catalog' ? 'Catalog' : t === 'book' ? 'Book a Rental' : t === 'pricing' ? '⚙️ Pricing' : t === 'admin' ? 'Admin' : 'My History'}
           </Button>
         ))}
       </div>
@@ -113,11 +133,54 @@ export default function RentalsPage() {
               <CardContent>
                 <div className="space-y-2">
                   {cat.instruments.map(inst => {
-                    const p = RENTAL_PRICING[inst];
+                    const p = activePricing[inst];
                     return (
                       <div key={inst} className="flex justify-between items-center text-sm">
                         <span>{inst}</span>
                         <span className="text-muted-foreground">${p?.daily}/day · ${p?.monthly}/mo</span>
+                      </div>
+                    );
+                  })}
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      )}
+
+      {/* Pricing (Admin only) */}
+      {tab === 'pricing' && role === 'admin' && (
+        <div className="space-y-4">
+          <div className="flex items-center justify-between">
+            <p className="text-sm text-muted-foreground">Adjust rental rates per instrument. Changes apply to the catalog and booking form.</p>
+            <div className="flex items-center gap-2">
+              {pricingSaved && <span className="text-sm text-green-400">✓ Saved!</span>}
+              <Button onClick={savePricing} size="sm"><Save className="h-4 w-4 mr-1" /> Save Pricing</Button>
+            </div>
+          </div>
+          {RENTAL_CATEGORIES.map(cat => (
+            <Card key={cat.name}>
+              <CardHeader className="pb-2"><CardTitle className="text-primary text-base">{cat.name}</CardTitle></CardHeader>
+              <CardContent>
+                <div className="space-y-3">
+                  <div className="grid grid-cols-5 gap-2 text-xs text-muted-foreground font-medium">
+                    <span>Instrument</span><span>Daily ($)</span><span>Weekly ($)</span><span>Monthly ($)</span><span>Semester ($)</span>
+                  </div>
+                  {cat.instruments.map(inst => {
+                    const p = customPricing[inst] || RENTAL_PRICING[inst] || { daily: 0, weekly: 0, monthly: 0, semester: 0 };
+                    return (
+                      <div key={inst} className="grid grid-cols-5 gap-2 items-center">
+                        <span className="text-sm">{inst}</span>
+                        {(['daily', 'weekly', 'monthly', 'semester'] as RentalDuration[]).map(dur => (
+                          <Input
+                            key={dur}
+                            type="number"
+                            min={0}
+                            value={p[dur]}
+                            onChange={e => handlePricingChange(inst, dur, Number(e.target.value))}
+                            className="h-8 text-sm"
+                          />
+                        ))}
                       </div>
                     );
                   })}

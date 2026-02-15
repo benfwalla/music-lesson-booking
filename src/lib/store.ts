@@ -1,6 +1,6 @@
 'use client';
 
-import { Student, Booking, TimeSlot, InstructorProfile, MatchResult, Instrument, Announcement, RentalBooking } from './types';
+import { Student, Booking, TimeSlot, InstructorProfile, MatchResult, Instrument, Announcement, RentalBooking, RentalPricing } from './types';
 
 const STORAGE_KEYS = {
   INSTRUCTOR_PROFILE: 'mlb_instructor_profile',
@@ -288,6 +288,17 @@ export function computeAllMatches(): MatchResult[] {
   return students
     .map(s => computeMatch(instructor, s))
     .sort((a, b) => b.score - a.score);
+}
+
+// Custom Rental Pricing (admin-adjustable)
+const RENTAL_PRICING_KEY = 'mlb_rental_pricing';
+
+export function getCustomRentalPricing(): Record<string, RentalPricing> | null {
+  return getItem<Record<string, RentalPricing> | null>(RENTAL_PRICING_KEY, null);
+}
+
+export function setCustomRentalPricing(pricing: Record<string, RentalPricing>): void {
+  setItem(RENTAL_PRICING_KEY, pricing);
 }
 
 // Rentals
