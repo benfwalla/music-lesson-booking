@@ -188,7 +188,7 @@ export default function StudentsPage() {
           {students.map(student => {
             const allInstruments = [...student.instruments.filter(i => i !== 'Other'), ...(student.customInstruments || [])];
             return (
-              <Card key={student.id} className="overflow-hidden hover:border-primary/20 hover:shadow-[0_0_15px_rgba(245,197,24,0.05)] transition-all">
+              <Card key={student.id} className="overflow-hidden hover:border-primary/20 hover:shadow-[0_0_15px_rgba(197,165,90,0.05)] transition-all">
                 <CardHeader className="flex flex-row items-start justify-between pb-3">
                   <div className="flex items-start gap-3">
                     <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center shrink-0 mt-0.5">

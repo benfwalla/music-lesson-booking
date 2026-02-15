@@ -52,9 +52,12 @@ export function Nav() {
     <aside className="fixed top-0 left-0 h-screen w-56 bg-[#111111] border-r border-border flex flex-col z-50">
       {/* Logo */}
       <div className="px-4 py-5 border-b border-border">
-        <Link href="/" className="flex items-center gap-2 font-bold text-xl text-primary">
-          <Music className="h-6 w-6" />
-          MusicBook
+        <Link href="/" className="flex items-center gap-2.5">
+          <Music className="h-6 w-6 text-primary shrink-0" />
+          <div className="leading-tight">
+            <span className="font-bold text-sm text-primary tracking-wide">ELEVATED</span>
+            <span className="block text-[10px] text-[#8a8a8a] tracking-widest uppercase">Music Center</span>
+          </div>
         </Link>
       </div>
 
@@ -78,7 +81,7 @@ export function Nav() {
                 'flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-150',
                 active
                   ? 'bg-primary text-primary-foreground'
-                  : 'text-[#a0a0a0] hover:bg-[#2a2200] hover:text-primary'
+                  : 'text-[#8a8a8a] hover:bg-[#1c1708] hover:text-[#D4AF37]'
               )}
             >
               <Icon className="h-4 w-4 shrink-0" />
@@ -92,7 +95,7 @@ export function Nav() {
       <div className="px-3 py-4 border-t border-border">
         <button
           onClick={clearRole}
-          className="flex items-center gap-2 w-full px-3 py-2.5 rounded-lg text-sm font-medium text-[#a0a0a0] hover:bg-[#2a2200] hover:text-primary transition-all duration-150"
+          className="flex items-center gap-2 w-full px-3 py-2.5 rounded-lg text-sm font-medium text-[#8a8a8a] hover:bg-[#1c1708] hover:text-[#D4AF37] transition-all duration-150"
         >
           <ArrowLeftRight className="h-4 w-4" />
           Switch Role

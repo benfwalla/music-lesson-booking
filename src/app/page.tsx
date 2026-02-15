@@ -54,7 +54,7 @@ export default function Dashboard() {
           <Music className="h-8 w-8 text-primary" />
           Dashboard
         </h1>
-        <p className="text-muted-foreground mt-1">Welcome to MusicBook — your lesson scheduling hub</p>
+        <p className="text-muted-foreground mt-1">Welcome to Elevated Music Center — your lesson scheduling hub</p>
       </div>
 
       <div className="grid grid-cols-2 lg:grid-cols-5 gap-4">
@@ -84,7 +84,7 @@ export default function Dashboard() {
           { href: '/schedule', title: 'Schedule & Match', desc: 'View compatibility & book lessons' },
         ].map(({ href, title, desc }) => (
           <Link key={href} href={href}>
-            <Card className="hover:border-primary/40 hover:shadow-[0_0_15px_rgba(245,197,24,0.1)] transition-all cursor-pointer h-full">
+            <Card className="hover:border-primary/40 hover:shadow-[0_0_15px_rgba(197,165,90,0.1)] transition-all cursor-pointer h-full">
               <CardContent className="flex items-center justify-between pt-6">
                 <div>
                   <h3 className="font-semibold">{title}</h3>

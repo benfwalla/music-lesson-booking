@@ -14,8 +14,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "MusicBook - Lesson Booking",
-  description: "Music lesson scheduling and booking app",
+  title: "Elevated Music Center",
+  description: "Lesson scheduling and booking for Elevated Music Center",
 };
 
 export default function RootLayout({
