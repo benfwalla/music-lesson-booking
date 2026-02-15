@@ -354,29 +354,37 @@ const SEED_INSTRUCTORS: { name: string; instruments: Instrument[] }[] = [
 
 export function seedInstructors(): void {
   if (typeof window === 'undefined') return;
-  if (localStorage.getItem(STORAGE_KEYS.SEEDED)) return;
-
-  const instructors: InstructorProfile[] = SEED_INSTRUCTORS.map(s => {
-    const [first, ...rest] = s.name.split(' ');
-    const last = rest.join('.').toLowerCase();
-    return {
-      id: crypto.randomUUID(),
-      name: s.name,
-      email: `${first.toLowerCase()}.${last}@elevatedmusic.com`,
-      phone: '',
-      bio: '',
-      instruments: s.instruments,
-      customInstruments: [],
-      skillLevels: ['Beginner', 'Intermediate', 'Advanced'] as const as any,
-      lessonDurations: [30, 60, 90] as const as any,
-      availability: [],
-    };
-  });
+  
+  // Version the seed so we can re-seed when instructor list changes
+  const SEED_VERSION = '2';
+  const currentVersion = localStorage.getItem(STORAGE_KEYS.SEEDED);
+  if (currentVersion === SEED_VERSION) return;
 
   const existing = getItem<InstructorProfile[]>(STORAGE_KEYS.INSTRUCTORS, []);
-  if (existing.length === 0) {
-    setInstructors(instructors);
+  const existingNames = new Set(existing.map(i => i.name));
+
+  const newInstructors: InstructorProfile[] = SEED_INSTRUCTORS
+    .filter(s => !existingNames.has(s.name))
+    .map(s => {
+      const [first, ...rest] = s.name.split(' ');
+      const last = rest.join('.').toLowerCase();
+      return {
+        id: crypto.randomUUID(),
+        name: s.name,
+        email: `${first.toLowerCase()}.${last}@elevatedmusic.com`,
+        phone: '',
+        bio: '',
+        instruments: s.instruments,
+        customInstruments: [],
+        skillLevels: ['Beginner', 'Intermediate', 'Advanced'] as const as any,
+        lessonDurations: [30, 60, 90] as const as any,
+        availability: [],
+      };
+    });
+
+  if (newInstructors.length > 0) {
+    setInstructors([...existing, ...newInstructors]);
   }
 
-  localStorage.setItem(STORAGE_KEYS.SEEDED, 'true');
+  localStorage.setItem(STORAGE_KEYS.SEEDED, SEED_VERSION);
 }
