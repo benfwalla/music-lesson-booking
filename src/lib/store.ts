@@ -1,6 +1,6 @@
 'use client';
 
-import { Student, Booking, TimeSlot, InstructorProfile, MatchResult, Instrument, Announcement, RentalBooking, RentalPricing, Resource, LessonRequest } from './types';
+import { Student, Booking, TimeSlot, InstructorProfile, MatchResult, Instrument, Announcement, RentalBooking, RentalPricing, Resource, LessonRequest, normalizeLessonRequest } from './types';
 
 const STORAGE_KEYS = {
   INSTRUCTOR_PROFILE: 'mlb_instructor_profile',
@@ -353,7 +353,7 @@ export function deleteResource(id: string): void {
 
 // Lesson Requests
 export function getLessonRequests(): LessonRequest[] {
-  return getItem<LessonRequest[]>(STORAGE_KEYS.LESSON_REQUESTS, []);
+  return getItem<LessonRequest[]>(STORAGE_KEYS.LESSON_REQUESTS, []).map(normalizeLessonRequest);
 }
 
 export function addLessonRequest(request: LessonRequest): void {

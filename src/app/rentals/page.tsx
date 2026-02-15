@@ -296,24 +296,29 @@ export default function RentalsPage() {
             </Button>
           </div>
           {rentals.length === 0 && <p className="text-muted-foreground">No rental bookings yet.</p>}
-          {rentals.map(r => (
-            <Card key={r.id}>
-              <CardContent className="py-4 flex flex-wrap items-center justify-between gap-3">
-                <div>
-                  <p className="font-semibold">{r.instrument} <Badge className={STATUS_COLORS[r.status]}>{r.status.replace('_', ' ')}</Badge></p>
-                  <p className="text-sm text-muted-foreground">{r.renterName} · {r.confirmationCode} · ${r.price}/{r.duration}</p>
-                  <p className="text-xs text-muted-foreground">Pickup: {PICKUP_LOCATIONS[r.pickupLocation]} · Starts: {r.startDate}</p>
+          {rentals.length > 0 && (
+            <div className="rounded-xl border border-border overflow-hidden">
+              {rentals.map((r, idx) => (
+                <div key={r.id} className={`flex flex-col md:flex-row md:items-center gap-3 px-4 py-3 hover:bg-[#1a1708] transition-colors ${idx < rentals.length - 1 ? 'border-b border-border' : ''}`}>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <span className="font-semibold text-sm">{r.instrument}</span>
+                      <Badge className={`${STATUS_COLORS[r.status]} text-[11px]`}>{r.status.replace('_', ' ')}</Badge>
+                      <span className="text-xs font-mono text-muted-foreground">{r.confirmationCode}</span>
+                    </div>
+                    <div className="text-xs text-muted-foreground mt-0.5">{r.renterName} · ${r.price}/{r.duration} · Starts: {r.startDate}</div>
+                  </div>
+                  <div className="flex gap-2 shrink-0">
+                    {r.status === 'pending' && <Button size="sm" className="h-7 text-xs" onClick={() => handleStatusChange(r.id, 'picked_up')}>Mark Picked Up</Button>}
+                    {r.status === 'picked_up' && <Button size="sm" className="h-7 text-xs" onClick={() => handleStatusChange(r.id, 'returned')}>Mark Returned</Button>}
+                    {r.status !== 'cancelled' && r.status !== 'returned' && (
+                      <Button size="sm" variant="outline" className="h-7 text-xs" onClick={() => handleStatusChange(r.id, 'cancelled')}>Cancel</Button>
+                    )}
+                  </div>
                 </div>
-                <div className="flex gap-2">
-                  {r.status === 'pending' && <Button size="sm" onClick={() => handleStatusChange(r.id, 'picked_up')}>Mark Picked Up</Button>}
-                  {r.status === 'picked_up' && <Button size="sm" onClick={() => handleStatusChange(r.id, 'returned')}>Mark Returned</Button>}
-                  {r.status !== 'cancelled' && r.status !== 'returned' && (
-                    <Button size="sm" variant="outline" onClick={() => handleStatusChange(r.id, 'cancelled')}>Cancel</Button>
-                  )}
-                </div>
-              </CardContent>
-            </Card>
-          ))}
+              ))}
+            </div>
+          )}
         </div>
       )}
 
@@ -321,29 +326,27 @@ export default function RentalsPage() {
       {tab === 'history' && (
         <div className="space-y-3">
           {rentals.length === 0 && <p className="text-muted-foreground">No rental history.</p>}
-          {rentals.map(r => (
-            <Card key={r.id}>
-              <CardContent className="py-4">
-                <div className="flex justify-between items-start">
-                  <div>
-                    <p className="font-semibold">{r.instrument} <Badge className={STATUS_COLORS[r.status]}>{r.status.replace('_', ' ')}</Badge></p>
-                    <p className="text-sm text-muted-foreground">Code: {r.confirmationCode} · ${r.price}/{r.duration} · {r.startDate}</p>
-                    <p className="text-xs text-muted-foreground">{r.renterName} · {PICKUP_LOCATIONS[r.pickupLocation]}</p>
+          {rentals.length > 0 && (
+            <div className="rounded-xl border border-border overflow-hidden">
+              {rentals.map((r, idx) => (
+                <div key={r.id} className={`flex items-center gap-4 px-4 py-3 hover:bg-[#1a1708] transition-colors ${idx < rentals.length - 1 ? 'border-b border-border' : ''}`}>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <span className="font-semibold text-sm">{r.instrument}</span>
+                      <Badge className={`${STATUS_COLORS[r.status]} text-[11px]`}>{r.status.replace('_', ' ')}</Badge>
+                    </div>
+                    <div className="text-xs text-muted-foreground">{r.confirmationCode} · ${r.price}/{r.duration} · {r.startDate} · {r.renterName}</div>
                   </div>
                   {r.status === 'pending' && (
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      className="text-destructive border-destructive/50 hover:bg-destructive/10"
-                      onClick={() => { handleStatusChange(r.id, 'cancelled'); }}
-                    >
-                      Cancel Rental
+                    <Button size="sm" variant="outline" className="text-destructive border-destructive/50 hover:bg-destructive/10 h-7 text-xs shrink-0"
+                      onClick={() => handleStatusChange(r.id, 'cancelled')}>
+                      Cancel
                     </Button>
                   )}
                 </div>
-              </CardContent>
-            </Card>
-          ))}
+              ))}
+            </div>
+          )}
         </div>
       )}
 

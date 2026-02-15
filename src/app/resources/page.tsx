@@ -89,37 +89,30 @@ export default function ResourcesPage() {
         </div>
       )}
 
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        {visible.map(r => {
+      <div className="rounded-xl border border-border overflow-hidden">
+        {visible.map((r, idx) => {
           const badge = TYPE_BADGE[r.type];
           return (
-            <div key={r.id} className="bg-card border border-border rounded-xl p-4 space-y-3 hover:border-primary/40 transition-colors">
-              <div className="flex items-start justify-between gap-2">
-                <div className="min-w-0">
-                  <h3 className="font-semibold text-sm truncate">{r.title}</h3>
-                  {r.description && <p className="text-xs text-muted-foreground mt-0.5 line-clamp-2">{r.description}</p>}
-                </div>
-                <span className={`shrink-0 px-2 py-0.5 rounded text-[10px] font-bold uppercase ${badge.cls}`}>{badge.label}</span>
+            <div key={r.id} className={`flex flex-col md:flex-row md:items-center gap-3 px-4 py-3 hover:bg-[#1a1708] transition-colors ${idx < visible.length - 1 ? 'border-b border-border' : ''}`}>
+              <span className={`shrink-0 px-2 py-0.5 rounded text-[10px] font-bold uppercase ${badge.cls}`}>{badge.label}</span>
+              <div className="min-w-0 flex-1">
+                <div className="font-semibold text-sm">{r.title}</div>
+                {r.description && <div className="text-xs text-muted-foreground truncate">{r.description}</div>}
               </div>
-              {role !== 'student' && (
-                <p className="text-xs text-muted-foreground">
-                  By: {r.uploadedByName} · {r.assignedTo.length === 0 ? 'All Students' : r.assignedTo.map(studentName).join(', ')}
-                </p>
-              )}
-              {role === 'student' && (
-                <p className="text-xs text-muted-foreground">From: {r.uploadedByName}</p>
-              )}
-              <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                {r.instrument && <span className="px-1.5 py-0.5 rounded bg-primary/10 text-primary text-[10px]">{r.instrument}</span>}
-                <span className="ml-auto">{new Date(r.createdAt).toLocaleDateString()}</span>
+              <div className="hidden md:flex items-center gap-2 text-xs text-muted-foreground shrink-0">
+                {role !== 'student' && <span>By: {r.uploadedByName}</span>}
+                {role !== 'student' && <span>· {r.assignedTo.length === 0 ? 'All' : r.assignedTo.map(studentName).join(', ')}</span>}
+                {role === 'student' && <span>From: {r.uploadedByName}</span>}
               </div>
-              <div className="flex gap-2 pt-1 border-t border-border">
+              {r.instrument && <span className="hidden lg:inline px-1.5 py-0.5 rounded bg-primary/10 text-primary text-[10px] shrink-0">{r.instrument}</span>}
+              <span className="hidden md:inline text-[11px] text-muted-foreground shrink-0">{new Date(r.createdAt).toLocaleDateString()}</span>
+              <div className="flex gap-2 shrink-0">
                 <button onClick={() => handleView(r)} className="flex items-center gap-1 text-xs text-primary hover:underline"><Eye className="h-3 w-3" /> View</button>
                 {r.type !== 'text' && (
                   <button onClick={() => handleDownload(r)} className="flex items-center gap-1 text-xs text-primary hover:underline"><Download className="h-3 w-3" /> Download</button>
                 )}
                 {canDelete(r) && (
-                  <button onClick={() => handleDelete(r.id)} className="flex items-center gap-1 text-xs text-red-400 hover:underline ml-auto"><Trash2 className="h-3 w-3" /> Delete</button>
+                  <button onClick={() => handleDelete(r.id)} className="flex items-center gap-1 text-xs text-red-400 hover:underline"><Trash2 className="h-3 w-3" /> Delete</button>
                 )}
               </div>
             </div>

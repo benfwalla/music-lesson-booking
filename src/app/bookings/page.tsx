@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { useRole } from '@/lib/role-context';
-import { getBookings, deleteBooking, getStudents } from '@/lib/store';
+import { getBookings, deleteBooking } from '@/lib/store';
 import { exportBookingsToExcel } from '@/lib/excel';
 import { Booking, DAYS_OF_WEEK } from '@/lib/types';
 import { BookOpen, Download, Trash2, Music, RefreshCw } from 'lucide-react';
@@ -18,14 +18,7 @@ export default function BookingsPage() {
 
   useEffect(() => {
     let b = getBookings();
-    // Filter bookings for non-admin roles
-    if (role === 'instructor' && profileId) {
-      // Show bookings — instructors see all (they're the teacher)
-      // In a real app you'd filter by instructorId, but bookings don't have that field
-      // So instructors see all bookings
-    } else if (role === 'student' && profileId) {
-      b = b.filter(bk => bk.studentId === profileId);
-    }
+    if (role === 'student' && profileId) b = b.filter(bk => bk.studentId === profileId);
     setBookingsList(b);
   }, [role, profileId]);
 
@@ -75,35 +68,32 @@ export default function BookingsPage() {
           {isAdmin && <p className="text-muted-foreground">Go to <a href="/schedule" className="text-primary underline">Schedule</a> to book lessons</p>}
         </CardContent></Card>
       ) : view === 'list' ? (
-        <div className="grid gap-3">
-          {sortedBookings.map(booking => (
-            <Card key={booking.id} className="hover:border-primary/20 transition-colors">
-              <CardContent className="flex items-center justify-between py-4">
-                <div className="flex items-center gap-4">
-                  <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center">
-                    <Music className="h-5 w-5 text-primary" />
-                  </div>
-                  <div>
-                    <div className="font-medium">{booking.studentName}</div>
-                    <div className="text-sm text-muted-foreground">
-                      {booking.instrument && <>{booking.instrument} • </>}
-                      {booking.notes && <>{booking.notes} • </>}
-                      {new Date(booking.createdAt).toLocaleDateString()}
-                    </div>
-                  </div>
+        <div className="rounded-xl border border-border overflow-hidden">
+          {sortedBookings.map((booking, idx) => (
+            <div key={booking.id}
+              className={`flex items-center gap-4 px-4 py-3 hover:bg-[#1a1708] transition-colors ${idx < sortedBookings.length - 1 ? 'border-b border-border' : ''}`}>
+              <div className="h-9 w-9 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
+                <Music className="h-4 w-4 text-primary" />
+              </div>
+              <div className="min-w-0 flex-1">
+                <div className="font-semibold text-sm">{booking.studentName}</div>
+                <div className="text-xs text-muted-foreground">
+                  {booking.instrument && <>{booking.instrument} · </>}
+                  {booking.notes && <>{booking.notes} · </>}
+                  {new Date(booking.createdAt).toLocaleDateString()}
                 </div>
-                <div className="flex items-center gap-2">
-                  <Badge variant="outline">{booking.day}</Badge>
-                  <Badge variant="secondary">{booking.startTime} – {booking.endTime}</Badge>
-                  {booking.recurring && <Badge>Weekly</Badge>}
-                  {isAdmin && (
-                    <Button variant="ghost" size="icon" onClick={() => handleDelete(booking.id)}>
-                      <Trash2 className="h-4 w-4 text-destructive" />
-                    </Button>
-                  )}
-                </div>
-              </CardContent>
-            </Card>
+              </div>
+              <div className="flex items-center gap-2 shrink-0">
+                <Badge variant="outline" className="text-xs">{booking.day}</Badge>
+                <Badge variant="secondary" className="text-xs">{booking.startTime} – {booking.endTime}</Badge>
+                {booking.recurring && <Badge className="text-xs">Weekly</Badge>}
+                {isAdmin && (
+                  <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => handleDelete(booking.id)}>
+                    <Trash2 className="h-3.5 w-3.5 text-destructive" />
+                  </Button>
+                )}
+              </div>
+            </div>
           ))}
         </div>
       ) : (

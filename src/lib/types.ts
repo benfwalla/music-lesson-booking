@@ -38,6 +38,11 @@ export interface InstructorProfile {
   availability: TimeSlot[];
 }
 
+export interface PreferredSlot {
+  day: string;
+  time: string;
+}
+
 export interface LessonRequest {
   id: string;
   studentName: string;
@@ -47,12 +52,26 @@ export interface LessonRequest {
   instructorName: string;
   instrument: string;
   preferredDuration: number;
-  preferredDay: string;
-  preferredTime: string;
+  preferredSlots: PreferredSlot[];
+  /** @deprecated use preferredSlots */
+  preferredDay?: string;
+  /** @deprecated use preferredSlots */
+  preferredTime?: string;
   notes: string;
   status: 'pending' | 'approved' | 'denied';
   adminNotes?: string;
   createdAt: string;
+}
+
+/** Normalize legacy single day/time into preferredSlots array */
+export function normalizeLessonRequest(req: LessonRequest): LessonRequest {
+  if (!req.preferredSlots || req.preferredSlots.length === 0) {
+    if (req.preferredDay && req.preferredTime) {
+      return { ...req, preferredSlots: [{ day: req.preferredDay, time: req.preferredTime }] };
+    }
+    return { ...req, preferredSlots: [] };
+  }
+  return req;
 }
 
 export interface Student {

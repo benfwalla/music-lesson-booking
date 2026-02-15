@@ -1,15 +1,15 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Card, CardContent } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
 import { getInstructors, addLessonRequest } from '@/lib/store';
-import { InstructorProfile, DAYS_OF_WEEK, LessonRequest } from '@/lib/types';
-import { UserCheck, GraduationCap, Timer, Clock, Mail, Phone, Send, CheckCircle2 } from 'lucide-react';
+import { InstructorProfile, DAYS_OF_WEEK, LessonRequest, PreferredSlot } from '@/lib/types';
+import { UserCheck, GraduationCap, Timer, Clock, Mail, Phone, Send, CheckCircle2, Plus, X } from 'lucide-react';
 
 const AVATAR_GRADIENTS = [
   'from-amber-500 to-yellow-600',
@@ -38,16 +38,13 @@ function getInitials(name: string): string {
 }
 
 function InstructorAvatar({ instructor, size = 'md' }: { instructor: InstructorProfile; size?: 'sm' | 'md' | 'lg' }) {
-  const sizeClasses = { sm: 'h-10 w-10 text-sm', md: 'h-14 w-14 text-lg', lg: 'h-20 w-20 text-2xl' };
+  const sizeClasses = { sm: 'h-10 w-10 text-sm', md: 'h-11 w-11 text-base', lg: 'h-20 w-20 text-2xl' };
   const gradient = AVATAR_GRADIENTS[hashName(instructor.name) % AVATAR_GRADIENTS.length];
 
   if (instructor.photoUrl) {
     return (
-      <img
-        src={instructor.photoUrl}
-        alt={instructor.name}
-        className={`${sizeClasses[size]} rounded-full object-cover shrink-0 ring-2 ring-primary/30`}
-      />
+      <img src={instructor.photoUrl} alt={instructor.name}
+        className={`${sizeClasses[size]} rounded-full object-cover shrink-0 ring-2 ring-primary/30`} />
     );
   }
 
@@ -67,30 +64,43 @@ export default function InstructorsPage() {
   // Form state
   const [instrument, setInstrument] = useState('');
   const [duration, setDuration] = useState(60);
-  const [preferredDay, setPreferredDay] = useState('');
-  const [preferredTime, setPreferredTime] = useState('');
+  const [preferredSlots, setPreferredSlots] = useState<PreferredSlot[]>([{ day: '', time: '' }]);
   const [studentName, setStudentName] = useState('');
   const [studentEmail, setStudentEmail] = useState('');
   const [studentPhone, setStudentPhone] = useState('');
   const [notes, setNotes] = useState('');
 
-  useEffect(() => {
-    setInstructors(getInstructors());
-  }, []);
+  useEffect(() => { setInstructors(getInstructors()); }, []);
 
   function resetForm() {
-    setInstrument(''); setDuration(60); setPreferredDay(''); setPreferredTime('');
+    setInstrument(''); setDuration(60); setPreferredSlots([{ day: '', time: '' }]);
     setStudentName(''); setStudentEmail(''); setStudentPhone(''); setNotes('');
   }
 
+  function addSlot() {
+    setPreferredSlots(prev => [...prev, { day: '', time: '' }]);
+  }
+
+  function removeSlot(index: number) {
+    if (preferredSlots.length <= 1) return;
+    setPreferredSlots(prev => prev.filter((_, i) => i !== index));
+  }
+
+  function updateSlot(index: number, field: 'day' | 'time', value: string) {
+    setPreferredSlots(prev => prev.map((s, i) => i === index ? { ...s, [field]: value } : s));
+  }
+
+  const allSlotsValid = preferredSlots.length > 0 && preferredSlots.every(s => s.day && s.time);
+
   function handleSubmit() {
-    if (!bookingInstructor || !instrument || !preferredDay || !preferredTime || !studentName || !studentEmail || !studentPhone) return;
+    if (!bookingInstructor || !instrument || !allSlotsValid || !studentName || !studentEmail || !studentPhone) return;
     const request: LessonRequest = {
       id: crypto.randomUUID(),
       studentName, studentEmail, studentPhone,
       instructorId: bookingInstructor.id,
       instructorName: bookingInstructor.name,
-      instrument, preferredDuration: duration, preferredDay, preferredTime,
+      instrument, preferredDuration: duration,
+      preferredSlots,
       notes, status: 'pending',
       createdAt: new Date().toISOString(),
     };
@@ -124,78 +134,45 @@ export default function InstructorsPage() {
           </CardContent>
         </Card>
       ) : (
-        <div className="grid gap-6 md:grid-cols-2">
-          {instructors.map(instructor => {
+        <div className="rounded-xl border border-border overflow-hidden">
+          {instructors.map((instructor, idx) => {
             const allInstruments = [
               ...instructor.instruments.filter(i => i !== 'Other'),
               ...instructor.customInstruments,
             ];
             return (
-              <Card key={instructor.id} className="overflow-hidden interactive-card">
-                <CardHeader>
-                  <div className="flex items-start gap-4">
-                    <InstructorAvatar instructor={instructor} />
-                    <div className="min-w-0">
-                      <CardTitle className="text-xl">{instructor.name}</CardTitle>
-                      {instructor.bio && (
-                        <CardDescription className="mt-1">{instructor.bio}</CardDescription>
-                      )}
-                    </div>
-                  </div>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="flex flex-wrap gap-1.5">
-                    {allInstruments.map(i => (
-                      <Badge key={i} variant="secondary" className="text-sm">{i}</Badge>
-                    ))}
-                  </div>
-
-                  <div className="flex flex-wrap gap-3 text-sm text-muted-foreground">
-                    {instructor.skillLevels.length > 0 && (
-                      <span className="flex items-center gap-1">
-                        <GraduationCap className="h-3.5 w-3.5" />
-                        {instructor.skillLevels.join(', ')}
-                      </span>
-                    )}
-                    {instructor.lessonDurations.length > 0 && (
-                      <span className="flex items-center gap-1">
-                        <Timer className="h-3.5 w-3.5" />
-                        {instructor.lessonDurations.map(d => `${d}min`).join(', ')}
-                      </span>
-                    )}
-                    {instructor.availability.length > 0 && (
-                      <span className="flex items-center gap-1">
-                        <Clock className="h-3.5 w-3.5" />
-                        {instructor.availability.length} time slot{instructor.availability.length !== 1 ? 's' : ''}
-                      </span>
-                    )}
-                  </div>
-
-                  {(instructor.email || instructor.phone) && (
-                    <div className="border-t border-border/50 pt-3 flex flex-wrap gap-4 text-sm">
-                      {instructor.email && (
-                        <a href={`mailto:${instructor.email}`} className="flex items-center gap-1.5 text-primary hover:underline">
-                          <Mail className="h-4 w-4" /> {instructor.email}
-                        </a>
-                      )}
-                      {instructor.phone && (
-                        <a href={`tel:${instructor.phone}`} className="flex items-center gap-1.5 text-primary hover:underline">
-                          <Phone className="h-4 w-4" /> {instructor.phone}
-                        </a>
-                      )}
-                    </div>
+              <div key={instructor.id}
+                className={`flex items-center gap-4 px-4 py-3 hover:bg-[#1a1708] transition-colors ${idx < instructors.length - 1 ? 'border-b border-border' : ''}`}>
+                <InstructorAvatar instructor={instructor} />
+                <div className="min-w-0 flex-1">
+                  <div className="font-semibold text-sm">{instructor.name}</div>
+                  {instructor.bio && <div className="text-xs text-muted-foreground truncate">{instructor.bio}</div>}
+                </div>
+                <div className="hidden md:flex flex-wrap gap-1 max-w-[280px]">
+                  {allInstruments.map(i => (
+                    <Badge key={i} variant="secondary" className="text-[11px] px-1.5 py-0">{i}</Badge>
+                  ))}
+                </div>
+                <div className="hidden lg:flex items-center gap-3 text-xs text-muted-foreground shrink-0">
+                  {instructor.skillLevels.length > 0 && (
+                    <span className="flex items-center gap-1"><GraduationCap className="h-3 w-3" />{instructor.skillLevels.join(', ')}</span>
                   )}
-
-                  <Button
-                    onClick={() => { setBookingInstructor(instructor); setInstrument(allInstruments[0] || ''); }}
-                    className="w-full mt-2"
-                    size="sm"
-                  >
-                    <Send className="h-4 w-4 mr-1.5" />
-                    Request Lesson
-                  </Button>
-                </CardContent>
-              </Card>
+                </div>
+                <div className="hidden lg:flex items-center gap-2 shrink-0">
+                  {instructor.email && (
+                    <a href={`mailto:${instructor.email}`} className="text-primary hover:underline"><Mail className="h-4 w-4" /></a>
+                  )}
+                  {instructor.phone && (
+                    <a href={`tel:${instructor.phone}`} className="text-primary hover:underline"><Phone className="h-4 w-4" /></a>
+                  )}
+                </div>
+                <Button
+                  onClick={() => { setBookingInstructor(instructor); setInstrument(allInstruments[0] || ''); }}
+                  size="sm" className="shrink-0"
+                >
+                  <Send className="h-3.5 w-3.5 mr-1" /> Request
+                </Button>
+              </div>
             );
           })}
         </div>
@@ -230,19 +207,35 @@ export default function InstructorsPage() {
                 </select>
               </div>
             </div>
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <Label>Preferred Day</Label>
-                <select className="w-full mt-1 rounded-md border border-border bg-background px-3 py-2 text-sm" value={preferredDay} onChange={e => setPreferredDay(e.target.value)}>
-                  <option value="">Select day...</option>
-                  {DAYS_OF_WEEK.map(d => <option key={d} value={d}>{d}</option>)}
-                </select>
+
+            {/* Preferred Time Slots */}
+            <div>
+              <Label className="mb-2 block">Preferred Times</Label>
+              <div className="space-y-2">
+                {preferredSlots.map((slot, idx) => (
+                  <div key={idx} className="flex items-center gap-2">
+                    <select
+                      className="flex-1 rounded-md border border-border bg-background px-3 py-2 text-sm"
+                      value={slot.day} onChange={e => updateSlot(idx, 'day', e.target.value)}
+                    >
+                      <option value="">Day...</option>
+                      {DAYS_OF_WEEK.map(d => <option key={d} value={d}>{d}</option>)}
+                    </select>
+                    <Input type="time" value={slot.time} onChange={e => updateSlot(idx, 'time', e.target.value)} className="flex-1" />
+                    {preferredSlots.length > 1 && (
+                      <button type="button" onClick={() => removeSlot(idx)} className="text-muted-foreground hover:text-destructive transition-colors p-1">
+                        <X className="h-4 w-4" />
+                      </button>
+                    )}
+                  </div>
+                ))}
               </div>
-              <div>
-                <Label>Preferred Time</Label>
-                <Input type="time" value={preferredTime} onChange={e => setPreferredTime(e.target.value)} className="mt-1" />
-              </div>
+              <button type="button" onClick={addSlot}
+                className="mt-2 flex items-center gap-1 text-xs text-primary hover:underline">
+                <Plus className="h-3 w-3" /> Add Another Time
+              </button>
             </div>
+
             <div className="grid grid-cols-2 gap-4">
               <div><Label>Your Name</Label><Input value={studentName} onChange={e => setStudentName(e.target.value)} className="mt-1" placeholder="Full name" /></div>
               <div><Label>Phone Number</Label><Input type="tel" value={studentPhone} onChange={e => setStudentPhone(e.target.value)} className="mt-1" placeholder="(555) 123-4567" /></div>
@@ -262,10 +255,7 @@ export default function InstructorsPage() {
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => { setBookingInstructor(null); resetForm(); }}>Cancel</Button>
-            <Button
-              onClick={handleSubmit}
-              disabled={!instrument || !preferredDay || !preferredTime || !studentName || !studentEmail || !studentPhone}
-            >
+            <Button onClick={handleSubmit} disabled={!instrument || !allSlotsValid || !studentName || !studentEmail || !studentPhone}>
               <Send className="h-4 w-4 mr-1.5" /> Request Booking
             </Button>
           </DialogFooter>

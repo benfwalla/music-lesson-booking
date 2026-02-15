@@ -120,33 +120,35 @@ export default function AnnouncementsPage() {
           <p className="text-muted-foreground">{isAdmin ? 'Post your first announcement' : 'Check back later for updates'}</p>
         </CardContent></Card>
       ) : (
-        <div className="grid gap-4">
-          {announcements.map(a => (
-            <Card key={a.id} className={a.type === 'recital' ? 'border-primary/30' : 'hover:border-primary/20 transition-colors'}>
-              <CardHeader className="flex flex-row items-start justify-between pb-2">
-                <div>
+        <div className="rounded-xl border border-border overflow-hidden">
+          {announcements.map((a, idx) => (
+            <div key={a.id} className={`px-4 py-3 hover:bg-[#1a1708] transition-colors ${idx < announcements.length - 1 ? 'border-b border-border' : ''}`}>
+              <div className="flex items-start gap-3">
+                <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 flex-wrap">
-                    <CardTitle className="text-lg">{a.title}</CardTitle>
-                    {a.type === 'recital' && <Badge className="bg-primary/10 text-primary border-primary/20">🎵 Recital</Badge>}
+                    {a.type === 'recital' ? (
+                      <Badge className="bg-primary/10 text-primary border-primary/20 text-[11px]">🎵 Recital</Badge>
+                    ) : (
+                      <Badge variant="secondary" className="text-[11px]">📢 General</Badge>
+                    )}
+                    <span className="font-semibold text-sm">{a.title}</span>
+                    <span className="text-[11px] text-muted-foreground flex items-center gap-1">
+                      <CalendarDays className="h-3 w-3" />
+                      {new Date(a.createdAt).toLocaleDateString()}
+                      {a.updatedAt !== a.createdAt && ` · Updated ${new Date(a.updatedAt).toLocaleDateString()}`}
+                    </span>
                   </div>
-                  <CardDescription className="flex items-center gap-1 mt-1">
-                    <CalendarDays className="h-3 w-3" />
-                    Posted {new Date(a.createdAt).toLocaleDateString()}
-                    {a.updatedAt !== a.createdAt && ` • Updated ${new Date(a.updatedAt).toLocaleDateString()}`}
-                  </CardDescription>
+                  {a.body && <p className="text-xs text-muted-foreground mt-1 line-clamp-2">{a.body}</p>}
+                  {a.type === 'recital' && a.recitalDate && <div className="mt-1"><CountdownTimer targetDate={a.recitalDate} /></div>}
                 </div>
                 {isAdmin && (
                   <div className="flex gap-1 shrink-0">
-                    <Button variant="ghost" size="icon" onClick={() => { setEditing(a); setShowForm(true); }}><Pencil className="h-4 w-4" /></Button>
-                    <Button variant="ghost" size="icon" onClick={() => handleDelete(a.id)}><Trash2 className="h-4 w-4 text-destructive" /></Button>
+                    <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => { setEditing(a); setShowForm(true); }}><Pencil className="h-3.5 w-3.5" /></Button>
+                    <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => handleDelete(a.id)}><Trash2 className="h-3.5 w-3.5 text-destructive" /></Button>
                   </div>
                 )}
-              </CardHeader>
-              <CardContent className="space-y-3">
-                {a.body && <p className="text-sm whitespace-pre-wrap">{a.body}</p>}
-                {a.type === 'recital' && a.recitalDate && <div className="pt-2"><CountdownTimer targetDate={a.recitalDate} /></div>}
-              </CardContent>
-            </Card>
+              </div>
+            </div>
           ))}
         </div>
       )}

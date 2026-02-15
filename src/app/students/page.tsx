@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -109,8 +109,8 @@ function ScoreBadge({ score }: { score: number }) {
     : score >= 25 ? 'bg-orange-900/50 text-orange-400 border-orange-700'
     : 'bg-red-900/50 text-red-400 border-red-700';
   return (
-    <span className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-bold border ${color}`}>
-      <TrendingUp className="h-3 w-3" />{score}% match
+    <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-bold border ${color}`}>
+      <TrendingUp className="h-3 w-3" />{score}%
     </span>
   );
 }
@@ -184,52 +184,51 @@ export default function StudentsPage() {
           <h3 className="text-lg font-semibold">No students yet</h3>
         </CardContent></Card>
       ) : (
-        <div className="grid gap-4">
-          {students.map(student => {
+        <div className="rounded-xl border border-border overflow-hidden">
+          {students.map((student, idx) => {
             const allInstruments = [...student.instruments.filter(i => i !== 'Other'), ...(student.customInstruments || [])];
             return (
-              <Card key={student.id} className="overflow-hidden hover:border-primary/20 hover:shadow-[0_0_15px_rgba(197,165,90,0.05)] transition-all">
-                <CardHeader className="flex flex-row items-start justify-between pb-3">
-                  <div className="flex items-start gap-3">
-                    <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center shrink-0 mt-0.5">
-                      <Music className="h-5 w-5 text-primary" />
-                    </div>
-                    <div>
-                      <CardTitle className="flex items-center gap-2 flex-wrap">
-                        {student.name}
-                        {isAdmin && <ScoreBadge score={matchScores[student.id] || 0} />}
-                      </CardTitle>
-                      <CardDescription>{[student.email, student.phone].filter(Boolean).join(' • ') || 'No contact info'}</CardDescription>
-                    </div>
+              <div key={student.id}
+                className={`flex flex-col md:flex-row md:items-center gap-3 px-4 py-3 hover:bg-[#1a1708] transition-colors ${idx < students.length - 1 ? 'border-b border-border' : ''}`}>
+                <div className="flex items-center gap-3 min-w-0 flex-1">
+                  <div className="h-9 w-9 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
+                    <Music className="h-4 w-4 text-primary" />
                   </div>
-                  {isAdmin && (
-                    <div className="flex gap-1 shrink-0">
-                      <Button variant="ghost" size="icon" onClick={() => { setEditingStudent(student); setShowForm(true); }}><Pencil className="h-4 w-4" /></Button>
-                      <Button variant="ghost" size="icon" onClick={() => handleDelete(student.id)}><Trash2 className="h-4 w-4 text-destructive" /></Button>
+                  <div className="min-w-0">
+                    <div className="flex items-center gap-2">
+                      <span className="font-semibold text-sm">{student.name}</span>
+                      {isAdmin && <ScoreBadge score={matchScores[student.id] || 0} />}
                     </div>
-                  )}
-                </CardHeader>
-                <CardContent className="space-y-3">
-                  <div className="flex flex-wrap gap-4 text-sm">
-                    {allInstruments.length > 0 && <div className="flex items-center gap-1.5"><Music className="h-3.5 w-3.5 text-muted-foreground" /><span>{allInstruments.join(', ')}</span></div>}
-                    <div className="flex items-center gap-1.5"><GraduationCap className="h-3.5 w-3.5 text-muted-foreground" /><span>{student.skillLevel}</span></div>
-                    <div className="flex items-center gap-1.5"><Timer className="h-3.5 w-3.5 text-muted-foreground" /><span>{student.preferredDuration} min lessons</span></div>
+                    <div className="text-xs text-muted-foreground truncate">{[student.email, student.phone].filter(Boolean).join(' · ') || 'No contact info'}</div>
                   </div>
-                  {student.emergencyContactName && (
-                    <div className="flex items-center gap-2 text-sm bg-primary/5 border border-primary/20 rounded-md px-3 py-2">
-                      <ShieldAlert className="h-4 w-4 text-primary shrink-0" />
-                      <span><strong>Emergency:</strong> {student.emergencyContactName}{student.emergencyContactRelationship && ` (${student.emergencyContactRelationship})`}{student.emergencyContactPhone && ` — ${student.emergencyContactPhone}`}</span>
-                    </div>
-                  )}
-                  {student.availability.length > 0 && (
-                    <div className="flex flex-wrap gap-1.5">
-                      {DAYS_OF_WEEK.map(day => student.availability.filter(s => s.day === day).map(slot => (
-                        <Badge key={slot.id} variant="outline" className="text-xs">{day.slice(0, 3)} {slot.startTime}–{slot.endTime}</Badge>
-                      )))}
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
+                </div>
+                <div className="hidden md:flex flex-wrap gap-1 max-w-[180px]">
+                  {allInstruments.map(i => <Badge key={i} variant="secondary" className="text-[11px] px-1.5 py-0">{i}</Badge>)}
+                </div>
+                <div className="hidden lg:flex items-center gap-3 text-xs text-muted-foreground shrink-0">
+                  <span className="flex items-center gap-1"><GraduationCap className="h-3 w-3" />{student.skillLevel}</span>
+                  <span className="flex items-center gap-1"><Timer className="h-3 w-3" />{student.preferredDuration}min</span>
+                </div>
+                {student.emergencyContactName && (
+                  <div className="hidden xl:flex items-center gap-1 text-xs text-muted-foreground shrink-0">
+                    <ShieldAlert className="h-3 w-3 text-primary" />
+                    <span>{student.emergencyContactName}{student.emergencyContactPhone && ` · ${student.emergencyContactPhone}`}</span>
+                  </div>
+                )}
+                {student.availability.length > 0 && (
+                  <div className="hidden xl:flex flex-wrap gap-1 shrink-0 max-w-[200px]">
+                    {DAYS_OF_WEEK.map(day => student.availability.filter(s => s.day === day).slice(0, 2).map(slot => (
+                      <Badge key={slot.id} variant="outline" className="text-[10px] px-1 py-0">{day.slice(0, 3)} {slot.startTime}</Badge>
+                    )))}
+                  </div>
+                )}
+                {isAdmin && (
+                  <div className="flex gap-1 shrink-0">
+                    <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => { setEditingStudent(student); setShowForm(true); }}><Pencil className="h-3.5 w-3.5" /></Button>
+                    <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => handleDelete(student.id)}><Trash2 className="h-3.5 w-3.5 text-destructive" /></Button>
+                  </div>
+                )}
+              </div>
             );
           })}
         </div>
