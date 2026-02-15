@@ -36,6 +36,9 @@ export interface InstructorProfile {
   skillLevels: SkillLevel[];
   lessonDurations: LessonDuration[];
   availability: TimeSlot[];
+  yearsExperience: number;
+  ageRangeMin: number;
+  ageRangeMax: number;
 }
 
 export interface PreferredSlot {

@@ -26,6 +26,9 @@ const DEFAULT_INSTRUCTOR: InstructorProfile = {
   skillLevels: [],
   lessonDurations: [],
   availability: [],
+  yearsExperience: 0,
+  ageRangeMin: 5,
+  ageRangeMax: 99,
 };
 
 function getItem<T>(key: string, defaultValue: T): T {
@@ -78,6 +81,9 @@ function migrateInstructor(p: InstructorProfile): InstructorProfile {
     skillLevels: p.skillLevels || [],
     lessonDurations: p.lessonDurations || [],
     availability: p.availability || [],
+    yearsExperience: p.yearsExperience ?? 0,
+    ageRangeMin: p.ageRangeMin ?? 5,
+    ageRangeMax: p.ageRangeMax ?? 99,
   };
 }
 
@@ -372,37 +378,37 @@ export function updateLessonRequest(request: LessonRequest): void {
 }
 
 // Seed instructors
-const SEED_INSTRUCTORS: { name: string; instruments: Instrument[] }[] = [
-  { name: 'Tim Kloewer', instruments: ['Banjo', 'Cello', 'French Horn', 'Guitar', 'Piano', 'Trombone', 'Trumpet', 'Tuba', 'Ukulele', 'Upright Bass', 'Vocals'] },
-  { name: 'Chris Asercion', instruments: ['Clarinet', 'Flute', 'Piano', 'Saxophone'] },
-  { name: 'Chad Irish', instruments: ['Drums'] },
-  { name: 'Keelan McDorman', instruments: ['Drums', 'Piano'] },
-  { name: 'Liam Shea', instruments: ['Drums', 'Guitar', 'Piano', 'Ukulele'] },
-  { name: 'Max Turski', instruments: ['Flute'] },
-  { name: 'Adam Hernandez', instruments: ['Guitar', 'Ukulele'] },
-  { name: 'Brett Kuyper', instruments: ['Guitar', 'Piano', 'Ukulele'] },
-  { name: 'Doug Emery', instruments: ['Guitar', 'Piano', 'Ukulele'] },
-  { name: 'Elle Reynolds', instruments: ['Guitar', 'Vocals'] },
-  { name: 'Elyjah Youngblood', instruments: ['Guitar'] },
-  { name: 'Evan Jelley', instruments: ['Guitar', 'Piano', 'Vocals'] },
-  { name: 'Gavi Torres-Olivares', instruments: ['Guitar'] },
-  { name: 'Ian Cheyne', instruments: ['Guitar'] },
-  { name: 'Jordan Cromwell', instruments: ['Guitar', 'Ukulele'] },
-  { name: 'Karan Shukla', instruments: ['Guitar'] },
-  { name: 'Melissa Getto', instruments: ['Guitar'] },
-  { name: 'Stephen Koss', instruments: ['Guitar'] },
-  { name: 'Ben Kane', instruments: ['Piano'] },
-  { name: 'Leanne Jojola', instruments: ['Piano', 'Ukulele', 'Vocals'] },
-  { name: 'Shilpa Ravoory', instruments: ['Piano', 'Viola', 'Violin'] },
-  { name: 'Sarah Platt', instruments: ['Viola', 'Violin'] },
-  { name: 'Ashleigh Hunniford', instruments: ['Ukulele', 'Vocals'] },
+const SEED_INSTRUCTORS: { name: string; instruments: Instrument[]; yearsExperience: number; ageRangeMin: number; ageRangeMax: number }[] = [
+  { name: 'Tim Kloewer', instruments: ['Banjo', 'Cello', 'French Horn', 'Guitar', 'Piano', 'Trombone', 'Trumpet', 'Tuba', 'Ukulele', 'Upright Bass', 'Vocals'], yearsExperience: 20, ageRangeMin: 5, ageRangeMax: 99 },
+  { name: 'Chris Asercion', instruments: ['Clarinet', 'Flute', 'Piano', 'Saxophone'], yearsExperience: 12, ageRangeMin: 6, ageRangeMax: 99 },
+  { name: 'Chad Irish', instruments: ['Drums'], yearsExperience: 8, ageRangeMin: 10, ageRangeMax: 99 },
+  { name: 'Keelan McDorman', instruments: ['Drums', 'Piano'], yearsExperience: 5, ageRangeMin: 5, ageRangeMax: 99 },
+  { name: 'Liam Shea', instruments: ['Drums', 'Guitar', 'Piano', 'Ukulele'], yearsExperience: 7, ageRangeMin: 5, ageRangeMax: 99 },
+  { name: 'Max Turski', instruments: ['Flute'], yearsExperience: 15, ageRangeMin: 6, ageRangeMax: 99 },
+  { name: 'Adam Hernandez', instruments: ['Guitar', 'Ukulele'], yearsExperience: 4, ageRangeMin: 5, ageRangeMax: 99 },
+  { name: 'Brett Kuyper', instruments: ['Guitar', 'Piano', 'Ukulele'], yearsExperience: 10, ageRangeMin: 5, ageRangeMax: 99 },
+  { name: 'Doug Emery', instruments: ['Guitar', 'Piano', 'Ukulele'], yearsExperience: 18, ageRangeMin: 5, ageRangeMax: 99 },
+  { name: 'Elle Reynolds', instruments: ['Guitar', 'Vocals'], yearsExperience: 6, ageRangeMin: 10, ageRangeMax: 99 },
+  { name: 'Elyjah Youngblood', instruments: ['Guitar'], yearsExperience: 3, ageRangeMin: 5, ageRangeMax: 99 },
+  { name: 'Evan Jelley', instruments: ['Guitar', 'Piano', 'Vocals'], yearsExperience: 9, ageRangeMin: 6, ageRangeMax: 99 },
+  { name: 'Gavi Torres-Olivares', instruments: ['Guitar'], yearsExperience: 5, ageRangeMin: 5, ageRangeMax: 99 },
+  { name: 'Ian Cheyne', instruments: ['Guitar'], yearsExperience: 11, ageRangeMin: 10, ageRangeMax: 99 },
+  { name: 'Jordan Cromwell', instruments: ['Guitar', 'Ukulele'], yearsExperience: 7, ageRangeMin: 5, ageRangeMax: 99 },
+  { name: 'Karan Shukla', instruments: ['Guitar'], yearsExperience: 4, ageRangeMin: 6, ageRangeMax: 99 },
+  { name: 'Melissa Getto', instruments: ['Guitar'], yearsExperience: 14, ageRangeMin: 5, ageRangeMax: 99 },
+  { name: 'Stephen Koss', instruments: ['Guitar'], yearsExperience: 16, ageRangeMin: 5, ageRangeMax: 99 },
+  { name: 'Ben Kane', instruments: ['Piano'], yearsExperience: 13, ageRangeMin: 5, ageRangeMax: 99 },
+  { name: 'Leanne Jojola', instruments: ['Piano', 'Ukulele', 'Vocals'], yearsExperience: 8, ageRangeMin: 5, ageRangeMax: 99 },
+  { name: 'Shilpa Ravoory', instruments: ['Piano', 'Viola', 'Violin'], yearsExperience: 17, ageRangeMin: 6, ageRangeMax: 99 },
+  { name: 'Sarah Platt', instruments: ['Viola', 'Violin'], yearsExperience: 10, ageRangeMin: 5, ageRangeMax: 99 },
+  { name: 'Ashleigh Hunniford', instruments: ['Ukulele', 'Vocals'], yearsExperience: 6, ageRangeMin: 5, ageRangeMax: 99 },
 ];
 
 export function seedInstructors(): void {
   if (typeof window === 'undefined') return;
   
   // Version the seed so we can re-seed when instructor list changes
-  const SEED_VERSION = '2';
+  const SEED_VERSION = '3';
   const currentVersion = localStorage.getItem(STORAGE_KEYS.SEEDED);
   if (currentVersion === SEED_VERSION) return;
 
@@ -425,6 +431,9 @@ export function seedInstructors(): void {
         skillLevels: ['Beginner', 'Intermediate', 'Advanced'] as const as any,
         lessonDurations: [30, 60, 90] as const as any,
         availability: [],
+        yearsExperience: s.yearsExperience,
+        ageRangeMin: s.ageRangeMin,
+        ageRangeMax: s.ageRangeMax,
       };
     });
 

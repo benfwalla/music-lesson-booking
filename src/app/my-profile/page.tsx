@@ -52,6 +52,7 @@ function InstructorSelfEdit({ profileId }: { profileId: string | null }) {
       id: id || crypto.randomUUID(),
       name: name.trim(), email: email.trim(), phone: phone.trim(), bio: bio.trim(),
       instruments, customInstruments, skillLevels, lessonDurations, availability,
+      yearsExperience: 0, ageRangeMin: 5, ageRangeMax: 99,
     };
     if (profileId) {
       updateInstructor(profile);

@@ -23,6 +23,9 @@ function InstructorForm({ instructor, onSave, onCancel }: { instructor?: Instruc
   const [skillLevels, setSkillLevels] = useState<SkillLevel[]>(instructor?.skillLevels || []);
   const [lessonDurations, setLessonDurations] = useState<LessonDuration[]>(instructor?.lessonDurations || []);
   const [availability, setAvailability] = useState(instructor?.availability || []);
+  const [yearsExperience, setYearsExperience] = useState(instructor?.yearsExperience ?? 0);
+  const [ageRangeMin, setAgeRangeMin] = useState(instructor?.ageRangeMin ?? 5);
+  const [ageRangeMax, setAgeRangeMax] = useState(instructor?.ageRangeMax ?? 99);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -38,6 +41,9 @@ function InstructorForm({ instructor, onSave, onCancel }: { instructor?: Instruc
       skillLevels,
       lessonDurations,
       availability,
+      yearsExperience,
+      ageRangeMin,
+      ageRangeMax,
     });
   };
 
@@ -65,6 +71,21 @@ function InstructorForm({ instructor, onSave, onCancel }: { instructor?: Instruc
             className="flex min-h-[80px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
             maxLength={300}
           />
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <div>
+          <Label>Years of Experience</Label>
+          <Input type="number" min={0} max={50} value={yearsExperience} onChange={e => setYearsExperience(Number(e.target.value))} />
+        </div>
+        <div>
+          <Label>Min Student Age</Label>
+          <Input type="number" min={3} max={99} value={ageRangeMin} onChange={e => setAgeRangeMin(Number(e.target.value))} />
+        </div>
+        <div>
+          <Label>Max Student Age</Label>
+          <Input type="number" min={3} max={99} value={ageRangeMax} onChange={e => setAgeRangeMax(Number(e.target.value))} />
         </div>
       </div>
 
