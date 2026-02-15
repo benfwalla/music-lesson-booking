@@ -13,7 +13,8 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
-import { Package, Guitar, Wind, Drum, Piano, Mic2, Settings2, Save } from 'lucide-react';
+import { Package, Guitar, Wind, Drum, Piano, Mic2, Settings2, Save, Download } from 'lucide-react';
+import { exportRentalsToExcel } from '@/lib/excel';
 
 function genCode(): string {
   const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
@@ -289,6 +290,11 @@ export default function RentalsPage() {
       {/* Admin */}
       {tab === 'admin' && role === 'admin' && (
         <div className="space-y-3">
+          <div className="flex justify-end">
+            <Button size="sm" onClick={() => exportRentalsToExcel(rentals)} disabled={rentals.length === 0}>
+              <Download className="h-4 w-4 mr-1" /> Export to Excel
+            </Button>
+          </div>
           {rentals.length === 0 && <p className="text-muted-foreground">No rental bookings yet.</p>}
           {rentals.map(r => (
             <Card key={r.id}>
@@ -324,6 +330,16 @@ export default function RentalsPage() {
                     <p className="text-sm text-muted-foreground">Code: {r.confirmationCode} · ${r.price}/{r.duration} · {r.startDate}</p>
                     <p className="text-xs text-muted-foreground">{r.renterName} · {PICKUP_LOCATIONS[r.pickupLocation]}</p>
                   </div>
+                  {r.status === 'pending' && (
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="text-destructive border-destructive/50 hover:bg-destructive/10"
+                      onClick={() => { handleStatusChange(r.id, 'cancelled'); }}
+                    >
+                      Cancel Rental
+                    </Button>
+                  )}
                 </div>
               </CardContent>
             </Card>
