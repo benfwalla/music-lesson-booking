@@ -28,10 +28,10 @@ function ScoreBar({ score, max, label }: { score: number; max: number; label: st
 }
 
 function ScoreCircle({ score }: { score: number }) {
-  const color = score >= 75 ? 'text-green-600 border-green-200 bg-green-50'
-    : score >= 50 ? 'text-yellow-600 border-yellow-200 bg-yellow-50'
-    : score >= 25 ? 'text-orange-600 border-orange-200 bg-orange-50'
-    : 'text-red-600 border-red-200 bg-red-50';
+  const color = score >= 75 ? 'text-green-400 border-green-700 bg-green-900/30'
+    : score >= 50 ? 'text-yellow-400 border-yellow-700 bg-yellow-900/30'
+    : score >= 25 ? 'text-orange-400 border-orange-700 bg-orange-900/30'
+    : 'text-red-400 border-red-700 bg-red-900/30';
 
   return (
     <div className={`h-16 w-16 rounded-full border-2 flex flex-col items-center justify-center shrink-0 ${color}`}>
@@ -81,7 +81,7 @@ function MatchCard({ match, onBook, instructor }: { match: MatchResult; onBook: 
             <div className="flex flex-wrap gap-2 mt-2">
               {match.instrumentOverlap.length > 0 ? (
                 match.instrumentOverlap.map(i => (
-                  <Badge key={i} className="bg-green-100 text-green-700 border-green-200">
+                  <Badge key={i} className="bg-green-900/30 text-green-400 border-green-700">
                     <Music className="h-3 w-3 mr-1" />{i}
                   </Badge>
                 ))
@@ -90,13 +90,13 @@ function MatchCard({ match, onBook, instructor }: { match: MatchResult; onBook: 
                   <Music className="h-3 w-3 mr-1" />No instrument match
                 </Badge>
               )}
-              <Badge variant={match.skillLevelMatch ? 'default' : 'outline'} className={match.skillLevelMatch ? 'bg-green-100 text-green-700 border-green-200' : 'text-muted-foreground'}>
+              <Badge variant={match.skillLevelMatch ? 'default' : 'outline'} className={match.skillLevelMatch ? 'bg-green-900/30 text-green-400 border-green-700' : 'text-muted-foreground'}>
                 <GraduationCap className="h-3 w-3 mr-1" />{match.student.skillLevel}
               </Badge>
-              <Badge variant={match.durationMatch ? 'default' : 'outline'} className={match.durationMatch ? 'bg-green-100 text-green-700 border-green-200' : 'text-muted-foreground'}>
+              <Badge variant={match.durationMatch ? 'default' : 'outline'} className={match.durationMatch ? 'bg-green-900/30 text-green-400 border-green-700' : 'text-muted-foreground'}>
                 <Timer className="h-3 w-3 mr-1" />{match.student.preferredDuration}min
               </Badge>
-              <Badge variant={match.timeOverlap.length > 0 ? 'default' : 'outline'} className={match.timeOverlap.length > 0 ? 'bg-green-100 text-green-700 border-green-200' : 'text-muted-foreground'}>
+              <Badge variant={match.timeOverlap.length > 0 ? 'default' : 'outline'} className={match.timeOverlap.length > 0 ? 'bg-green-900/30 text-green-400 border-green-700' : 'text-muted-foreground'}>
                 <Clock className="h-3 w-3 mr-1" />{match.timeOverlap.length} slot{match.timeOverlap.length !== 1 ? 's' : ''}
               </Badge>
             </div>
@@ -116,17 +116,17 @@ function MatchCard({ match, onBook, instructor }: { match: MatchResult; onBook: 
                 {/* Why they match / don't */}
                 <div className="space-y-1.5 text-sm">
                   {match.instrumentOverlap.length > 0 ? (
-                    <p className="text-green-700">✓ Both interested in: {match.instrumentOverlap.join(', ')}</p>
+                    <p className="text-green-400">✓ Both interested in: {match.instrumentOverlap.join(', ')}</p>
                   ) : (
                     <p className="text-muted-foreground">✗ No shared instruments — student wants {match.student.instruments.join(', ') || 'none set'}, you teach {instructor.instruments.join(', ') || 'none set'}</p>
                   )}
                   {match.skillLevelMatch ? (
-                    <p className="text-green-700">✓ You teach {match.student.skillLevel} students</p>
+                    <p className="text-green-400">✓ You teach {match.student.skillLevel} students</p>
                   ) : (
                     <p className="text-muted-foreground">✗ Student is {match.student.skillLevel}, you teach {instructor.skillLevels.join(', ') || 'none set'}</p>
                   )}
                   {match.durationMatch ? (
-                    <p className="text-green-700">✓ {match.student.preferredDuration}min lessons available</p>
+                    <p className="text-green-400">✓ {match.student.preferredDuration}min lessons available</p>
                   ) : (
                     <p className="text-muted-foreground">✗ Student wants {match.student.preferredDuration}min, you offer {instructor.lessonDurations.map(d => `${d}min`).join(', ') || 'none set'}</p>
                   )}
@@ -195,6 +195,8 @@ export default function SchedulePage() {
     setInstructor(getInstructorProfile());
   }, []);
 
+  // Admin-only page (nav handles visibility)
+
   const refresh = () => {
     setMatches(computeAllMatches());
   };
@@ -237,10 +239,10 @@ export default function SchedulePage() {
       </div>
 
       {!hasProfile && (
-        <Card className="border-amber-200 bg-amber-50">
+        <Card className="border-amber-700 bg-amber-900/30">
           <CardContent className="flex items-center gap-3 py-4">
-            <AlertCircle className="h-5 w-5 text-amber-600 shrink-0" />
-            <p className="text-sm text-amber-800">
+            <AlertCircle className="h-5 w-5 text-amber-400 shrink-0" />
+            <p className="text-sm text-amber-300">
               Set up your <a href="/availability" className="underline font-medium">instructor profile</a> first to get accurate match scores.
             </p>
           </CardContent>

@@ -128,6 +128,8 @@ export default function AvailabilityPage() {
     setInstructorsList(getInstructors());
   }, []);
 
+  // This page is admin-only (nav handles visibility)
+
   const refresh = () => setInstructorsList(getInstructors());
 
   const handleSave = (p: InstructorProfile) => {

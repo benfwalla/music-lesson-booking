@@ -1,29 +1,42 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { getBookings, deleteBooking } from '@/lib/store';
+import { useRole } from '@/lib/role-context';
+import { getBookings, deleteBooking, getStudents } from '@/lib/store';
 import { exportBookingsToExcel } from '@/lib/excel';
 import { Booking, DAYS_OF_WEEK } from '@/lib/types';
 import { BookOpen, Download, Trash2, Music, RefreshCw } from 'lucide-react';
 
 export default function BookingsPage() {
+  const { role, profileId } = useRole();
+  const isAdmin = role === 'admin';
   const [bookings, setBookingsList] = useState<Booking[]>([]);
   const [view, setView] = useState<'list' | 'calendar'>('list');
 
   useEffect(() => {
-    setBookingsList(getBookings());
-  }, []);
+    let b = getBookings();
+    // Filter bookings for non-admin roles
+    if (role === 'instructor' && profileId) {
+      // Show bookings — instructors see all (they're the teacher)
+      // In a real app you'd filter by instructorId, but bookings don't have that field
+      // So instructors see all bookings
+    } else if (role === 'student' && profileId) {
+      b = b.filter(bk => bk.studentId === profileId);
+    }
+    setBookingsList(b);
+  }, [role, profileId]);
 
-  const refresh = () => setBookingsList(getBookings());
+  const refresh = () => {
+    let b = getBookings();
+    if (role === 'student' && profileId) b = b.filter(bk => bk.studentId === profileId);
+    setBookingsList(b);
+  };
 
   const handleDelete = (id: string) => {
-    if (confirm('Delete this booking?')) {
-      deleteBooking(id);
-      refresh();
-    }
+    if (confirm('Delete this booking?')) { deleteBooking(id); refresh(); }
   };
 
   const sortedBookings = [...bookings].sort((a, b) => {
@@ -32,61 +45,39 @@ export default function BookingsPage() {
     return a.startTime.localeCompare(b.startTime);
   });
 
-  const calendarData = DAYS_OF_WEEK.map(day => ({
-    day,
-    bookings: sortedBookings.filter(b => b.day === day),
-  }));
+  const calendarData = DAYS_OF_WEEK.map(day => ({ day, bookings: sortedBookings.filter(b => b.day === day) }));
 
   return (
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold flex items-center gap-2">
-            <BookOpen className="h-8 w-8 text-primary" />
-            Bookings
+          <h1 className="text-3xl font-bold flex items-center gap-2"><BookOpen className="h-8 w-8 text-primary" />
+            {role === 'student' ? 'My Lessons' : role === 'instructor' ? 'My Schedule' : 'Bookings'}
           </h1>
-          <p className="text-muted-foreground mt-1">{bookings.length} total booking{bookings.length !== 1 ? 's' : ''}</p>
+          <p className="text-muted-foreground mt-1">{bookings.length} booking{bookings.length !== 1 ? 's' : ''}</p>
         </div>
         <div className="flex gap-2">
-          <Button
-            variant={view === 'list' ? 'default' : 'outline'}
-            size="sm"
-            onClick={() => setView('list')}
-          >
-            List
-          </Button>
-          <Button
-            variant={view === 'calendar' ? 'default' : 'outline'}
-            size="sm"
-            onClick={() => setView('calendar')}
-          >
-            Calendar
-          </Button>
-          <Button variant="outline" size="sm" onClick={refresh}>
-            <RefreshCw className="h-4 w-4" />
-          </Button>
-          <Button
-            size="sm"
-            onClick={() => exportBookingsToExcel(bookings)}
-            disabled={bookings.length === 0}
-          >
-            <Download className="h-4 w-4 mr-2" /> Export Excel
-          </Button>
+          <Button variant={view === 'list' ? 'default' : 'outline'} size="sm" onClick={() => setView('list')}>List</Button>
+          <Button variant={view === 'calendar' ? 'default' : 'outline'} size="sm" onClick={() => setView('calendar')}>Calendar</Button>
+          <Button variant="outline" size="sm" onClick={refresh}><RefreshCw className="h-4 w-4" /></Button>
+          {isAdmin && (
+            <Button size="sm" onClick={() => exportBookingsToExcel(bookings)} disabled={bookings.length === 0}>
+              <Download className="h-4 w-4 mr-2" /> Export Excel
+            </Button>
+          )}
         </div>
       </div>
 
       {bookings.length === 0 ? (
-        <Card>
-          <CardContent className="py-12 text-center">
-            <BookOpen className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-            <h3 className="text-lg font-semibold">No bookings yet</h3>
-            <p className="text-muted-foreground">Go to <a href="/schedule" className="text-primary underline">Schedule</a> to book lessons</p>
-          </CardContent>
-        </Card>
+        <Card><CardContent className="py-12 text-center">
+          <BookOpen className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+          <h3 className="text-lg font-semibold">No bookings yet</h3>
+          {isAdmin && <p className="text-muted-foreground">Go to <a href="/schedule" className="text-primary underline">Schedule</a> to book lessons</p>}
+        </CardContent></Card>
       ) : view === 'list' ? (
         <div className="grid gap-3">
           {sortedBookings.map(booking => (
-            <Card key={booking.id}>
+            <Card key={booking.id} className="hover:border-primary/20 transition-colors">
               <CardContent className="flex items-center justify-between py-4">
                 <div className="flex items-center gap-4">
                   <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center">
@@ -105,9 +96,11 @@ export default function BookingsPage() {
                   <Badge variant="outline">{booking.day}</Badge>
                   <Badge variant="secondary">{booking.startTime} – {booking.endTime}</Badge>
                   {booking.recurring && <Badge>Weekly</Badge>}
-                  <Button variant="ghost" size="icon" onClick={() => handleDelete(booking.id)}>
-                    <Trash2 className="h-4 w-4 text-destructive" />
-                  </Button>
+                  {isAdmin && (
+                    <Button variant="ghost" size="icon" onClick={() => handleDelete(booking.id)}>
+                      <Trash2 className="h-4 w-4 text-destructive" />
+                    </Button>
+                  )}
                 </div>
               </CardContent>
             </Card>
@@ -117,9 +110,7 @@ export default function BookingsPage() {
         <div className="grid grid-cols-1 md:grid-cols-7 gap-2">
           {calendarData.map(({ day, bookings: dayBookings }) => (
             <Card key={day} className="min-h-[150px]">
-              <CardHeader className="pb-2">
-                <CardTitle className="text-sm">{day.slice(0, 3)}</CardTitle>
-              </CardHeader>
+              <CardHeader className="pb-2"><CardTitle className="text-sm">{day.slice(0, 3)}</CardTitle></CardHeader>
               <CardContent className="space-y-1">
                 {dayBookings.map(booking => (
                   <div key={booking.id} className="p-2 rounded bg-primary/10 text-xs space-y-0.5">
@@ -127,9 +118,7 @@ export default function BookingsPage() {
                     <div className="text-muted-foreground">{booking.startTime}–{booking.endTime}</div>
                   </div>
                 ))}
-                {dayBookings.length === 0 && (
-                  <p className="text-xs text-muted-foreground italic">Free</p>
-                )}
+                {dayBookings.length === 0 && <p className="text-xs text-muted-foreground italic">Free</p>}
               </CardContent>
             </Card>
           ))}
